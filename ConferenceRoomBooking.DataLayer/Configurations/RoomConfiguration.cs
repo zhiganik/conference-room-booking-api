@@ -15,6 +15,8 @@ public class RoomConfiguration : IEntityTypeConfiguration<Room>
             .IsRequired();
 
         builder.Property(r => r.Capacity).IsRequired();
-        builder.Property(r => r.BaseHourRate).IsRequired();
+        builder.Property(r => r.BaseHourRate)
+            .HasColumnType("decimal(18,2)")
+            .IsRequired();
     }
 }
