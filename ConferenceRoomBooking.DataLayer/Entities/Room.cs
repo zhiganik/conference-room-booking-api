@@ -1,0 +1,12 @@
+﻿namespace ConferenceRoomBooking.DataLayer.Entities;
+
+public class Room
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public int Capacity { get; set; }
+    public decimal BaseHourRate { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    
+    public ICollection<RoomServiceOption> RoomServiceOptions { get; set; } = new List<RoomServiceOption>();
+}
