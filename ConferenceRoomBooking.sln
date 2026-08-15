@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConferenceRoomBooking.Api", "ConferenceRoomBooking.Api\ConferenceRoomBooking.Api.csproj", "{00A36421-7740-47BE-ACA5-CA604D3C4960}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConferenceRoomBooking.Application", "ConferenceRoomBooking.Application\ConferenceRoomBooking.Application.csproj", "{023B9943-78D7-43D5-AF22-CD93A107CBB9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConferenceRoomBooking.DataLayer", "ConferenceRoomBooking.DataLayer\ConferenceRoomBooking.DataLayer.csproj", "{87016A90-CA75-4066-A61E-49C01E7FDC1C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{00A36421-7740-47BE-ACA5-CA604D3C4960}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00A36421-7740-47BE-ACA5-CA604D3C4960}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00A36421-7740-47BE-ACA5-CA604D3C4960}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00A36421-7740-47BE-ACA5-CA604D3C4960}.Release|Any CPU.Build.0 = Release|Any CPU
+		{023B9943-78D7-43D5-AF22-CD93A107CBB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{023B9943-78D7-43D5-AF22-CD93A107CBB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{023B9943-78D7-43D5-AF22-CD93A107CBB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{023B9943-78D7-43D5-AF22-CD93A107CBB9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87016A90-CA75-4066-A61E-49C01E7FDC1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87016A90-CA75-4066-A61E-49C01E7FDC1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87016A90-CA75-4066-A61E-49C01E7FDC1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87016A90-CA75-4066-A61E-49C01E7FDC1C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
