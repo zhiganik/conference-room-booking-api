@@ -13,6 +13,14 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
         builder.Property(b => b.StartTime).IsRequired();
         builder.Property(b => b.EndTime).IsRequired();
 
+        builder.Property(b => b.BaseRoomCost)
+            .HasColumnType("decimal(18,2)")
+            .IsRequired();
+        
+        builder.Property(b => b.ServicesCost)
+            .HasColumnType("decimal(18,2)")
+            .IsRequired();
+        
         builder.Property(b => b.TotalPrice)
             .HasColumnType("decimal(18,2)")
             .IsRequired();

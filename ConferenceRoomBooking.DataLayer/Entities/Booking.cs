@@ -6,6 +6,8 @@ public class Booking
     public int RoomId { get; set; }
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
+    public decimal BaseRoomCost { get; set; }
+    public decimal ServicesCost { get; set; }
     public decimal TotalPrice { get; set; }
     public DateTime CreatedAtUtc { get; set; }
 
