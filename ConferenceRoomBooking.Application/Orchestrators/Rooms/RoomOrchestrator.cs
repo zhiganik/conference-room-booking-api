@@ -76,10 +76,15 @@ public class RoomOrchestrator(AppDbContext dbContext) : IRoomOrchestrator
             .FirstOrDefaultAsync(r => r.Id == roomId, cancellationToken);
 
         if (room is null)
-        {
             throw new NotFoundException(nameof(Room), roomId);
-        }
+        
+        var hasActiveOrUpcomingBookings = await dbContext.Bookings
+            .ForRoom(roomId)
+            .AnyAsync(b => b.EndTime > DateTime.UtcNow, cancellationToken);
 
+        if (hasActiveOrUpcomingBookings)
+            throw new ConflictException($"Room '{room.Name}' has active or upcoming bookings and cannot be deleted.");
+        
         room.IsDeleted = true;
         await dbContext.SaveChangesAsync(cancellationToken);
     }
