@@ -68,6 +68,7 @@ public class GlobalExceptionHandler(
     private static (HttpStatusCode StatusCode, string Title) MapException(Exception exception) => exception switch
     {
         NotFoundException => (HttpStatusCode.NotFound, "Resource not found"),
+        ConflictException => (HttpStatusCode.Conflict, "Conflict"),
         _ => (HttpStatusCode.InternalServerError, "An unexpected error occurred")
     };
 }

@@ -1,13 +1,12 @@
-﻿using System.Reflection;
-using ConferenceRoomBooking.Api.Middleware;
+﻿using ConferenceRoomBooking.Api.Middleware;
 using ConferenceRoomBooking.Application.Orchestrators.Rooms;
-using ConferenceRoomBooking.Application.Validators.Rooms;
+using ConferenceRoomBooking.Application.Orchestrators.ServiceOptions;
 using ConferenceRoomBooking.DataLayer;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
+using Validators = ConferenceRoomBooking.Application.Validators.Validators;
 
 namespace ConferenceRoomBooking.Api.Configurations;
 
@@ -48,6 +47,7 @@ public static class DependencyConfig
     private static IServiceCollection AddOrchestrators(this IServiceCollection services)
     {
         services.AddScoped<IRoomOrchestrator, RoomOrchestrator>();
+        services.AddScoped<IServiceOptionOrchestrator, ServiceOptionOrchestrator>();
         return services;
     }
     
