@@ -19,6 +19,7 @@ try
     app.UseApplicationPipeline();
     
     await RoleSeeder.SeedRolesAsync(app.Services);
+    await DataSeeder.SeedAsync(app.Services);
     
     app.Run();
 }
