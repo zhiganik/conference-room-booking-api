@@ -11,6 +11,7 @@ public static class ApplicationConfig
 
         app.UseHttpsRedirection();
         app.UseExceptionHandler();
+        app.MapControllers();
 
         return app;
     }
