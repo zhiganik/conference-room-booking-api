@@ -1,4 +1,7 @@
 ﻿using ConferenceRoomBooking.Api.Middleware;
+using ConferenceRoomBooking.Application.BusinessLogic.Availability;
+using ConferenceRoomBooking.Application.BusinessLogic.Pricing;
+using ConferenceRoomBooking.Application.Orchestrators.Booking;
 using ConferenceRoomBooking.Application.Orchestrators.Rooms;
 using ConferenceRoomBooking.Application.Orchestrators.ServiceOptions;
 using ConferenceRoomBooking.DataLayer;
@@ -21,6 +24,7 @@ public static class DependencyConfig
             .AddDb(config)
             .AddValidation()
             .AddSwaggerDocs()
+            .AddBusinessLogic()
             .AddOrchestrators();
     }
 
@@ -48,6 +52,14 @@ public static class DependencyConfig
     {
         services.AddScoped<IRoomOrchestrator, RoomOrchestrator>();
         services.AddScoped<IServiceOptionOrchestrator, ServiceOptionOrchestrator>();
+        services.AddScoped<IBookingOrchestrator, BookingOrchestrator>();
+        return services;
+    }
+    
+    private static IServiceCollection AddBusinessLogic(this IServiceCollection services)
+    {
+        services.AddSingleton<IRentalPriceCalculator, RentalPriceCalculator>();
+        services.AddSingleton<IRoomAvailabilityChecker, RoomAvailabilityChecker>();
         return services;
     }
     

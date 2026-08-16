@@ -4,5 +4,6 @@ namespace ConferenceRoomBooking.Application.Orchestrators.Booking;
 
 public interface IBookingOrchestrator
 {
-    public Task<BookingResponse> BookRoom(CreateBookingRequest request, CancellationToken cancellationToken);
+    Task<BookingResponse> CreateAsync(CreateBookingRequest request, CancellationToken cancellationToken);
+    Task<BookingResponse> GetByIdAsync(int bookingId, CancellationToken cancellationToken);
 }

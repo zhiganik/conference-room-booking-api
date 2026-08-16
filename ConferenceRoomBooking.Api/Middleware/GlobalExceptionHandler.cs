@@ -69,6 +69,7 @@ public class GlobalExceptionHandler(
     {
         NotFoundException => (HttpStatusCode.NotFound, "Resource not found"),
         ConflictException => (HttpStatusCode.Conflict, "Conflict"),
+        RoomUnavailableException => (HttpStatusCode.Conflict, "Room unavailable"),
         _ => (HttpStatusCode.InternalServerError, "An unexpected error occurred")
     };
 }
