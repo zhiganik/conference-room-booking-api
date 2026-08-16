@@ -1,3 +1,3 @@
 ﻿namespace ConferenceRoomBooking.Application.Dtos.Rooms;
 
-public record SearchAvailableRoomsRequest(DateOnly Date, TimeOnly StartTime, TimeOnly EndTime, int Capacity);
+public record SearchAvailableRoomsRequest(DateTime StartDate, DateTime EndDate, int Capacity);

@@ -5,26 +5,41 @@ namespace ConferenceRoomBooking.Application.Validators.Rooms;
 
 public class SearchAvailableRoomsRequestValidator : AbstractValidator<SearchAvailableRoomsRequest>
 {
+    private static readonly TimeSpan OperatingWindowStart = new(6, 0, 0);
+    private static readonly TimeSpan OperatingWindowEnd = new(23, 0, 0);
+    
     public SearchAvailableRoomsRequestValidator()
     {
-        RuleFor(x => x.Date)
-            .NotEqual(default(DateOnly)).WithMessage("Date is required.")
-            .GreaterThanOrEqualTo(DateOnly.FromDateTime(DateTime.UtcNow.Date))
-            .WithMessage("Date cannot be in the past.");
+        RuleFor(x => x.StartDate)
+            .NotEqual(default(DateTime)).WithMessage("StartDate is required.");
+
+        RuleFor(x => x.EndDate)
+            .NotEqual(default(DateTime)).WithMessage("EndDate is required.");
 
         RuleFor(x => x.Capacity)
             .GreaterThan(0).WithMessage("Capacity must be greater than zero.");
-
-        RuleFor(x => x)
-            .Must(x => x.StartTime < x.EndTime)
-            .WithMessage("StartTime must be earlier than EndTime.");
         
-        RuleFor(x => x.StartTime)
-            .GreaterThanOrEqualTo(new TimeOnly(6, 0))
-            .WithMessage("StartTime cannot be earlier than 06:00.");
+        When(x => x.StartDate != default && x.EndDate != default, () =>
+        {
+            RuleFor(x => x)
+                .Must(x => x.StartDate.Date == x.EndDate.Date)
+                .WithMessage("StartDate and EndDate must be on the same day.");
 
-        RuleFor(x => x.EndTime)
-            .LessThanOrEqualTo(new TimeOnly(23, 0))
-            .WithMessage("EndTime cannot be later than 23:00.");
+            RuleFor(x => x)
+                .Must(x => x.StartDate < x.EndDate)
+                .WithMessage("StartDate must be earlier than EndDate.");
+
+            RuleFor(x => x.StartDate)
+                .GreaterThanOrEqualTo(DateTime.Now.Date)
+                .WithMessage("StartDate cannot be in the past.");
+
+            RuleFor(x => x.StartDate.TimeOfDay)
+                .GreaterThanOrEqualTo(OperatingWindowStart)
+                .WithMessage("StartDate time cannot be earlier than 06:00.");
+
+            RuleFor(x => x.EndDate.TimeOfDay)
+                .LessThanOrEqualTo(OperatingWindowEnd)
+                .WithMessage("EndDate time cannot be later than 23:00.");
+        });
     }
 }
