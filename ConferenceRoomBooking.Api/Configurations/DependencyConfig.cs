@@ -8,6 +8,7 @@ using ConferenceRoomBooking.Application.Orchestrators.Auth;
 using ConferenceRoomBooking.Application.Orchestrators.Booking;
 using ConferenceRoomBooking.Application.Orchestrators.Rooms;
 using ConferenceRoomBooking.Application.Orchestrators.ServiceOptions;
+using ConferenceRoomBooking.Application.Security;
 using ConferenceRoomBooking.Application.Settings;
 using ConferenceRoomBooking.DataLayer;
 using ConferenceRoomBooking.DataLayer.Entities;
@@ -118,6 +119,15 @@ public static class DependencyConfig
             };
         });
         
+        return services;
+    }
+    
+    public static IServiceCollection AddAppAuthorization(this IServiceCollection services)
+    {
+        services.AddAuthorizationBuilder()
+            .AddPolicy(AuthorizationPolicies.RequireAdmin, policy => policy.RequireRole(Roles.Admin))
+            .AddPolicy(AuthorizationPolicies.RequireUser, policy => policy.RequireRole(Roles.User, Roles.Admin));
+
         return services;
     }
     

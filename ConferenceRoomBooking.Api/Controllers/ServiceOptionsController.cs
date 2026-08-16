@@ -1,11 +1,14 @@
 ﻿using ConferenceRoomBooking.Application.Dtos.ServiceOptions;
 using ConferenceRoomBooking.Application.Orchestrators.ServiceOptions;
+using ConferenceRoomBooking.Application.Security;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ConferenceRoomBooking.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Policy = AuthorizationPolicies.RequireUser)]
 public class ServiceOptionsController(IServiceOptionOrchestrator orchestrator) : ControllerBase
 {
     /// <response code="201">Service created successfully.</response>

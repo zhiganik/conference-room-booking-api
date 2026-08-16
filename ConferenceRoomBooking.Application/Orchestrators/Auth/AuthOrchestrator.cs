@@ -1,6 +1,7 @@
 ﻿using ConferenceRoomBooking.Application.BusinessLogic.Auth;
 using ConferenceRoomBooking.Application.Dtos.Auth;
 using ConferenceRoomBooking.Application.Exceptions;
+using ConferenceRoomBooking.Application.Security;
 using ConferenceRoomBooking.Application.Settings;
 using ConferenceRoomBooking.DataLayer.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -31,6 +32,7 @@ public class AuthOrchestrator(UserManager<AppUser> userManager,
             var errors = string.Join("; ", result.Errors.Select(e => e.Description));
             throw new ConflictException($"Registration failed: {errors}");
         }
+        await userManager.AddToRoleAsync(user, Roles.User);
 
         return await BuildAuthResponseAsync(user);
     }

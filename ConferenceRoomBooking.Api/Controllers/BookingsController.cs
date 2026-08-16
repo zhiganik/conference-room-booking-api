@@ -1,11 +1,14 @@
 ﻿using ConferenceRoomBooking.Application.Dtos.Booking;
 using ConferenceRoomBooking.Application.Orchestrators.Booking;
+using ConferenceRoomBooking.Application.Security;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ConferenceRoomBooking.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Policy = AuthorizationPolicies.RequireUser)]
 public class BookingsController(IBookingOrchestrator orchestrator) : ControllerBase
 {
     /// <response code="201">Booking created — includes calculated total cost.</response>

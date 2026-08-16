@@ -1,11 +1,14 @@
 ﻿using ConferenceRoomBooking.Application.Dtos.Rooms;
 using ConferenceRoomBooking.Application.Orchestrators.Rooms;
+using ConferenceRoomBooking.Application.Security;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ConferenceRoomBooking.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Policy = AuthorizationPolicies.RequireUser)]
 public class RoomsController(IRoomOrchestrator roomOrchestrator) : ControllerBase
 {
     /// <summary>Creates a new conference room with its base rate and offered services.</summary>

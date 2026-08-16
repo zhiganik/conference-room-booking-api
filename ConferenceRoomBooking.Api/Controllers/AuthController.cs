@@ -1,11 +1,13 @@
 ﻿using ConferenceRoomBooking.Application.Dtos.Auth;
 using ConferenceRoomBooking.Application.Orchestrators.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ConferenceRoomBooking.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[AllowAnonymous]
 public class AuthController(IAuthOrchestrator authOrchestrator) : ControllerBase
 {
     /// <response code="200">Registration succeeded — returns an access token.</response>

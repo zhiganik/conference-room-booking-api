@@ -1,4 +1,5 @@
 using ConferenceRoomBooking.Api.Configurations;
+using ConferenceRoomBooking.Api.Startup;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -16,7 +17,9 @@ try
     var app = builder.Build();
 
     app.UseApplicationPipeline();
-
+    
+    await RoleSeeder.SeedRolesAsync(app.Services);
+    
     app.Run();
 }
 catch (Exception ex)
