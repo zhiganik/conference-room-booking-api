@@ -3,7 +3,10 @@
     image: conferenceroombooking.api
     container_name: conferenceroombooking.api
     environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
       ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=ConferenceRoomBookingDb;User Id=sa;Password=Dii1kKta9Tv8;TrustServerCertificate=True;"
+    ports:
+      - "5000:8080"
     build:
       context: .
       dockerfile: ConferenceRoomBooking.Api/Dockerfile

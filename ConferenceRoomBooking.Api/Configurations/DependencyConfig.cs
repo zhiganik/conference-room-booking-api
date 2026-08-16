@@ -1,10 +1,12 @@
-﻿using ConferenceRoomBooking.Api.Middleware;
+﻿using System.Reflection;
+using ConferenceRoomBooking.Api.Middleware;
 using ConferenceRoomBooking.Application.Orchestrators.Rooms;
 using ConferenceRoomBooking.Application.Validators.Rooms;
 using ConferenceRoomBooking.DataLayer;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 
 namespace ConferenceRoomBooking.Api.Configurations;
@@ -19,7 +21,7 @@ public static class DependencyConfig
             .AddExceptionHandler()
             .AddDb(config)
             .AddValidation()
-            .AddOpenApi()
+            .AddSwaggerDocs()
             .AddOrchestrators();
     }
 
@@ -46,6 +48,22 @@ public static class DependencyConfig
     private static IServiceCollection AddOrchestrators(this IServiceCollection services)
     {
         services.AddScoped<IRoomOrchestrator, RoomOrchestrator>();
+        return services;
+    }
+    
+    private static IServiceCollection AddSwaggerDocs(this IServiceCollection services)
+    {
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen(options =>
+        {
+            options.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Title = "Conference Room Booking API",
+                Version = "v1",
+                Description = "API for managing conference rooms, bookings, and rental pricing."
+            });
+        });
+
         return services;
     }
 }
