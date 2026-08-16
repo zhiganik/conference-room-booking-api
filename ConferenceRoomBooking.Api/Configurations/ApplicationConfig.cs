@@ -10,6 +10,7 @@ public static class ApplicationConfig
         }
 
         app.UseHttpsRedirection();
+        app.UseExceptionHandler();
 
         return app;
     }
