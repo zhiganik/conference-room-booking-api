@@ -7,11 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Dtos\" />
+        <ProjectReference Include="..\ConferenceRoomBooking.DataLayer\ConferenceRoomBooking.DataLayer.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\ConferenceRoomBooking.DataLayer\ConferenceRoomBooking.DataLayer.csproj" />
+      <PackageReference Include="FluentValidation" Version="12.1.1" />
     </ItemGroup>
 
 </Project>
