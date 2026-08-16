@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using ConferenceRoomBooking.Api.Middleware;
+using ConferenceRoomBooking.Api.Swagger;
 using ConferenceRoomBooking.Application.BusinessLogic;
 using ConferenceRoomBooking.Application.BusinessLogic.Auth;
 using ConferenceRoomBooking.Application.BusinessLogic.Availability;
@@ -15,7 +16,6 @@ using ConferenceRoomBooking.DataLayer.Entities;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -36,6 +36,7 @@ public static class DependencyConfig
             .AddValidation()
             .AddIdentity()
             .AddJwtAuthentication(config)
+            .AddAppAuthorization()
             .AddAuthorization()
             .AddSwaggerDocs()
             .AddBusinessLogic()
@@ -142,6 +143,18 @@ public static class DependencyConfig
                 Version = "v1",
                 Description = "API for managing conference rooms, bookings, and rental pricing."
             });
+            
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                Scheme = "Bearer",
+                BearerFormat = "JWT",
+                In = ParameterLocation.Header,
+                Description = "Enter your JWT access token. Do NOT include the word 'Bearer' — Swagger adds it automatically."
+            });
+
+            options.OperationFilter<AuthorizeOperationFilter>();
         });
 
         return services;
