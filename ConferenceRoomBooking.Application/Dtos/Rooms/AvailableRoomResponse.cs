@@ -1,3 +1,3 @@
 ﻿namespace ConferenceRoomBooking.Application.Dtos.Rooms;
 
-public record AvailableRoomResponse(DateOnly Date, TimeOnly StartTime, TimeOnly EndTime, int Capacity);
+public record AvailableRoomResponse(int Id, string Name, int Capacity, decimal BaseHourlyRate);

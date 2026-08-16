@@ -7,6 +7,7 @@ public class Room
     public int Capacity { get; set; }
     public decimal BaseHourRate { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public bool IsDeleted { get; set; }
     
     public ICollection<RoomServiceOption> RoomServiceOptions { get; set; } = new List<RoomServiceOption>();
 }

@@ -18,5 +18,7 @@ public class RoomConfiguration : IEntityTypeConfiguration<Room>
         builder.Property(r => r.BaseHourRate)
             .HasColumnType("decimal(18,2)")
             .IsRequired();
+        
+        builder.HasQueryFilter(r => !r.IsDeleted);
     }
 }

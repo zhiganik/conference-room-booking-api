@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
+﻿using System.Net;
+using ConferenceRoomBooking.Application.Exceptions;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ConferenceRoomBooking.Api.Middleware;
@@ -9,18 +11,41 @@ public class GlobalExceptionHandler(
 {
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
-        logger.LogError(exception, "An unhandled exception occurred");
+        var (statusCode, title) = MapException(exception);
+        
+        if (exception is AppException)
+        {
+            logger.LogWarning(exception, "Handled domain exception: {Message}", exception.Message);
+        }
+        else
+        {
+            logger.LogError(exception, "Unhandled exception processing {Method} {Path}",
+                httpContext.Request.Method, httpContext.Request.Path);
+        }
+        
+        httpContext.Response.StatusCode = (int)statusCode;
+        
+        var problemDetails = new ProblemDetails
+        {
+            Status = (int)statusCode,
+            Title = title,
+            Type = exception.GetType().Name,
+            Detail = exception is AppException appException
+                ? appException.Message
+                : "An unexpected error occurred. Please contact support if this persists."
+        };
         
         return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
         {
             HttpContext = httpContext,
             Exception = exception,
-            ProblemDetails = new ProblemDetails
-            {
-                Type = exception.GetType().Name,
-                Title = "An unhandled exception occurred",
-                Detail = exception.Message
-            }
+            ProblemDetails = problemDetails
         });
     }
+    
+    private static (HttpStatusCode StatusCode, string Title) MapException(Exception exception) => exception switch
+    {
+        NotFoundException => (HttpStatusCode.NotFound, "Resource not found"),
+        _ => (HttpStatusCode.InternalServerError, "An unexpected error occurred")
+    };
 }
