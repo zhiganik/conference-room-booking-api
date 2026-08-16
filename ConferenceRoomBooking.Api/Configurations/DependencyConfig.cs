@@ -1,12 +1,22 @@
-﻿using ConferenceRoomBooking.Api.Middleware;
+﻿using System.Text;
+using ConferenceRoomBooking.Api.Middleware;
+using ConferenceRoomBooking.Application.BusinessLogic;
+using ConferenceRoomBooking.Application.BusinessLogic.Auth;
 using ConferenceRoomBooking.Application.BusinessLogic.Availability;
 using ConferenceRoomBooking.Application.BusinessLogic.Pricing;
+using ConferenceRoomBooking.Application.Orchestrators.Auth;
 using ConferenceRoomBooking.Application.Orchestrators.Booking;
 using ConferenceRoomBooking.Application.Orchestrators.Rooms;
 using ConferenceRoomBooking.Application.Orchestrators.ServiceOptions;
+using ConferenceRoomBooking.Application.Settings;
 using ConferenceRoomBooking.DataLayer;
+using ConferenceRoomBooking.DataLayer.Entities;
 using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using Validators = ConferenceRoomBooking.Application.Validators.Validators;
@@ -23,6 +33,9 @@ public static class DependencyConfig
             .AddExceptionHandler()
             .AddDb(config)
             .AddValidation()
+            .AddIdentity()
+            .AddJwtAuthentication(config)
+            .AddAuthorization()
             .AddSwaggerDocs()
             .AddBusinessLogic()
             .AddOrchestrators();
@@ -53,6 +66,7 @@ public static class DependencyConfig
         services.AddScoped<IRoomOrchestrator, RoomOrchestrator>();
         services.AddScoped<IServiceOptionOrchestrator, ServiceOptionOrchestrator>();
         services.AddScoped<IBookingOrchestrator, BookingOrchestrator>();
+        services.AddScoped<IAuthOrchestrator, AuthOrchestrator>();
         return services;
     }
     
@@ -60,6 +74,50 @@ public static class DependencyConfig
     {
         services.AddSingleton<IRentalPriceCalculator, RentalPriceCalculator>();
         services.AddSingleton<IRoomAvailabilityChecker, RoomAvailabilityChecker>();
+        services.AddTransient<IJwtIssuer, JwtIssuer>();
+        return services;
+    }
+
+    private static IServiceCollection AddIdentity(this IServiceCollection services)
+    {
+        services.AddIdentity<AppUser, IdentityRole>(options => 
+        {
+            options.Password.RequireDigit = true;
+            options.Password.RequiredLength = 6; 
+            options.Password.RequireNonAlphanumeric = false; 
+        }).AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
+        
+        return services;
+    }
+    
+    private static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration config)
+    {
+        services.Configure<JwtSettings>(config.GetSection(JwtSettings.SectionName));
+        
+        var jwtSettings = config.GetSection(JwtSettings.SectionName).Get<JwtSettings>()
+                          ?? throw new InvalidOperationException("Jwt configuration section is missing.");
+        
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        }).AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,          
+                ValidateAudience = true,         
+                ValidateLifetime = true,         
+                ValidateIssuerSigningKey = true,
+
+                ValidIssuer = jwtSettings.Issuer,
+                ValidAudience = jwtSettings.Audience,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SigningKey 
+                    ?? throw new ArgumentException("Jwt:Key cannot be null or empty")))
+            };
+        });
+        
         return services;
     }
     

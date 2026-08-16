@@ -1,9 +1,10 @@
 ﻿using ConferenceRoomBooking.DataLayer.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace ConferenceRoomBooking.DataLayer;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<AppUser>(options)
 {
     public DbSet<Room> Rooms => Set<Room>();
     public DbSet<ServiceOption> ServiceOptions => Set<ServiceOption>();
