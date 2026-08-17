@@ -5,6 +5,7 @@ using ConferenceRoomBooking.Application.BusinessLogic;
 using ConferenceRoomBooking.Application.BusinessLogic.Auth;
 using ConferenceRoomBooking.Application.BusinessLogic.Availability;
 using ConferenceRoomBooking.Application.BusinessLogic.Pricing;
+using ConferenceRoomBooking.Application.Orchestrators.Analytics;
 using ConferenceRoomBooking.Application.Orchestrators.Auth;
 using ConferenceRoomBooking.Application.Orchestrators.Booking;
 using ConferenceRoomBooking.Application.Orchestrators.Rooms;
@@ -69,6 +70,7 @@ public static class DependencyConfig
         services.AddScoped<IServiceOptionOrchestrator, ServiceOptionOrchestrator>();
         services.AddScoped<IBookingOrchestrator, BookingOrchestrator>();
         services.AddScoped<IAuthOrchestrator, AuthOrchestrator>();
+        services.AddScoped<IAnalyticsOrchestrator, AnalyticsOrchestrator>();
         return services;
     }
     
