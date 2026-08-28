@@ -15,7 +15,8 @@ public class CreateBookingRequestValidator : AbstractValidator<CreateBookingRequ
 
         RuleFor(x => x.StartTime)
             .NotEqual(default(DateTime)).WithMessage("StartTime is required.")
-            .GreaterThanOrEqualTo(DateTime.Now).WithMessage("StartTime cannot be in the past.");
+            .MustBeUtc()
+            .GreaterThanOrEqualTo(DateTime.UtcNow).WithMessage("StartTime cannot be in the past.");
 
         RuleFor(x => x.DurationMinutes)
             .GreaterThanOrEqualTo(60).WithMessage("DurationMinutes must be greater than 1 hour.")

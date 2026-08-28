@@ -11,10 +11,12 @@ public class SearchAvailableRoomsRequestValidator : AbstractValidator<SearchAvai
     public SearchAvailableRoomsRequestValidator()
     {
         RuleFor(x => x.StartDate)
-            .NotEqual(default(DateTime)).WithMessage("StartDate is required.");
+            .NotEqual(default(DateTime)).WithMessage("StartDate is required.")
+            .MustBeUtc();
 
         RuleFor(x => x.EndDate)
-            .NotEqual(default(DateTime)).WithMessage("EndDate is required.");
+            .NotEqual(default(DateTime)).WithMessage("EndDate is required.")
+            .MustBeUtc();
 
         RuleFor(x => x.Capacity)
             .GreaterThan(0).WithMessage("Capacity must be greater than zero.");
@@ -30,7 +32,7 @@ public class SearchAvailableRoomsRequestValidator : AbstractValidator<SearchAvai
                 .WithMessage("StartDate must be earlier than EndDate.");
 
             RuleFor(x => x.StartDate)
-                .GreaterThanOrEqualTo(DateTime.Now.Date)
+                .GreaterThanOrEqualTo(DateTime.UtcNow.Date)
                 .WithMessage("StartDate cannot be in the past.");
 
             RuleFor(x => x.StartDate.TimeOfDay)
