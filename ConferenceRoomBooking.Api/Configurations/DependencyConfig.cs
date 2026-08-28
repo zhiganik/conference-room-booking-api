@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using ConferenceRoomBooking.Api.Middleware;
+using ConferenceRoomBooking.Api.Services;
 using ConferenceRoomBooking.Api.Swagger;
 using ConferenceRoomBooking.Application.BusinessLogic;
 using ConferenceRoomBooking.Application.BusinessLogic.Auth;
@@ -11,6 +12,7 @@ using ConferenceRoomBooking.Application.Orchestrators.Booking;
 using ConferenceRoomBooking.Application.Orchestrators.Rooms;
 using ConferenceRoomBooking.Application.Orchestrators.ServiceOptions;
 using ConferenceRoomBooking.Application.Security;
+using ConferenceRoomBooking.Application.Services;
 using ConferenceRoomBooking.Application.Settings;
 using ConferenceRoomBooking.DataLayer;
 using ConferenceRoomBooking.DataLayer.Entities;
@@ -35,12 +37,14 @@ public static class DependencyConfig
             .AddExceptionHandler()
             .AddDb(config)
             .AddValidation()
+            .AddHttpContextAccessor()
             .AddIdentity()
             .AddJwtAuthentication(config)
             .AddAppAuthorization()
             .AddAuthorization()
             .AddSwaggerDocs()
             .AddBusinessLogic()
+            .AddServices()
             .AddOrchestrators();
     }
 
@@ -61,6 +65,12 @@ public static class DependencyConfig
     {
         services.AddValidatorsFromAssembly(typeof(Validators).Assembly);
         services.AddFluentValidationAutoValidation();
+        return services;
+    }
+
+    private static IServiceCollection AddServices(this IServiceCollection services)
+    {
+        services.AddScoped<IUserContext, UserContext>();
         return services;
     }
 
@@ -108,6 +118,7 @@ public static class DependencyConfig
             options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         }).AddJwtBearer(options =>
         {
+            options.MapInboundClaims = false;
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,          

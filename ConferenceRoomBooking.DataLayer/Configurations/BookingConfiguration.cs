@@ -28,8 +28,16 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
         builder.Property(b => b.CreatedAtUtc).IsRequired();
 
         builder.HasOne(b => b.Room)
-            .WithMany()
+            .WithMany(r => r.Bookings)
             .HasForeignKey(b => b.RoomId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne<AppUser>()
+            .WithMany()
+            .HasForeignKey(b => b.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(b => b.UserId);
+        builder.HasIndex(b => b.RoomId);
     }
 }

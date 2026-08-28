@@ -1,12 +1,20 @@
 ﻿using ConferenceRoomBooking.Application.BusinessLogic.Pricing;
+using ConferenceRoomBooking.Application.Security;
 using ConferenceRoomBooking.DataLayer;
 using ConferenceRoomBooking.DataLayer.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace ConferenceRoomBooking.Api.Startup;
 
 public static class DataSeeder
 {
+    private const string SeedUserEmail = "seed.bookings@conference-room-booking.local";
+    private const string SeedUserPassword = "Seed@Bookings123!";
+
+    private const string AdminEmail = "admin@gmail.com";
+    private const string AdminPassword = "Admin1234!";
+
     private static readonly (string Name, int Capacity, decimal BaseHourlyRate)[] Rooms =
     [
         ("Room A", 50, 2000m),
@@ -41,12 +49,47 @@ public static class DataSeeder
     {
         using var scope = services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
         var priceCalculator = scope.ServiceProvider.GetRequiredService<IRentalPriceCalculator>();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<object>>();
 
         await SeedRoomsAsync(dbContext, logger);
         await SeedServiceOptionsAsync(dbContext, logger);
-        await SeedBookingsAsync(dbContext, priceCalculator, logger);
+
+        var seedUserId = await EnsureUserAsync(userManager, SeedUserEmail, SeedUserPassword, Roles.User, logger);
+        await EnsureUserAsync(userManager, AdminEmail, AdminPassword, Roles.Admin, logger);
+
+        await SeedBookingsAsync(dbContext, priceCalculator, seedUserId, logger);
+    }
+
+    private static async Task<string> EnsureUserAsync(UserManager<AppUser> userManager, string email, string password, string role, ILogger logger)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+
+        if (user is not null)
+        {
+            return user.Id;
+        }
+
+        user = new AppUser
+        {
+            UserName = email,
+            Email = email,
+            EmailConfirmed = true
+        };
+
+        var result = await userManager.CreateAsync(user, password);
+
+        if (!result.Succeeded)
+        {
+            var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+            throw new InvalidOperationException($"Failed to seed user '{email}': {errors}");
+        }
+
+        await userManager.AddToRoleAsync(user, role);
+
+        logger.LogInformation("Seeded {Role} user '{Email}'.", role, email);
+        return user.Id;
     }
 
     private static async Task SeedRoomsAsync(AppDbContext dbContext, ILogger logger)
@@ -97,7 +140,7 @@ public static class DataSeeder
             toInsert.Count, string.Join(", ", toInsert.Select(s => s.Name)));
     }
     
-    private static async Task SeedBookingsAsync(AppDbContext dbContext, IRentalPriceCalculator priceCalculator, ILogger logger)
+    private static async Task SeedBookingsAsync(AppDbContext dbContext, IRentalPriceCalculator priceCalculator, string seedUserId, ILogger logger)
     {
         if (await dbContext.Bookings.AnyAsync())
         {
@@ -131,6 +174,7 @@ public static class DataSeeder
             var booking = new Booking
             {
                 RoomId = room.Id,
+                UserId = seedUserId,
                 StartTime = startTime,
                 EndTime = endTime,
                 BaseRoomCost = priceBreakdown.BaseRoomCost,

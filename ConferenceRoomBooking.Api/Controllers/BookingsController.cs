@@ -36,4 +36,14 @@ public class BookingsController(IBookingOrchestrator orchestrator) : ControllerB
     {
         return await orchestrator.GetByIdAsync(bookingId, cancellationToken);
     }
+
+    /// <response code="200">Booking found.</response>
+    /// <response code="404">No booking exists with the given ID.</response>
+    [HttpGet("my")]
+    [ProducesResponseType(typeof(IReadOnlyList<BookingResponse>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<BookingResponse>>> GetMyBookings(CancellationToken cancellationToken)
+    {
+        var set = await orchestrator.GetByUser(cancellationToken);
+        return Ok(set);
+    }
 }

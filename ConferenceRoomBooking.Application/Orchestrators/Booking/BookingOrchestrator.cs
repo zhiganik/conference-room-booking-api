@@ -3,6 +3,7 @@ using ConferenceRoomBooking.Application.BusinessLogic.Pricing;
 using ConferenceRoomBooking.Application.Dtos.Booking;
 using ConferenceRoomBooking.Application.Exceptions;
 using ConferenceRoomBooking.Application.Mappers;
+using ConferenceRoomBooking.Application.Services;
 using ConferenceRoomBooking.DataLayer;
 using ConferenceRoomBooking.DataLayer.Entities;
 using ConferenceRoomBooking.DataLayer.QueryExtensions;
@@ -11,10 +12,13 @@ using Microsoft.EntityFrameworkCore;
 namespace ConferenceRoomBooking.Application.Orchestrators.Booking;
 
 public class BookingOrchestrator(AppDbContext dbContext, IRentalPriceCalculator priceCalculator, 
-    IRoomAvailabilityChecker availabilityChecker) : IBookingOrchestrator
+    IRoomAvailabilityChecker availabilityChecker, IUserContext userContext) : IBookingOrchestrator
 {
     public async Task<BookingResponse> CreateAsync(CreateBookingRequest request, CancellationToken cancellationToken)
     {
+        var currentUserId = userContext.UserId
+            ?? throw new UnauthorizedException("User is not authenticated.");
+
         var room = await dbContext.Rooms
             .Include(r => r.RoomServiceOptions)
             .FirstOrDefaultAsync(r => r.Id == request.RoomId, cancellationToken);
@@ -46,6 +50,7 @@ public class BookingOrchestrator(AppDbContext dbContext, IRentalPriceCalculator 
         var booking = new DataLayer.Entities.Booking
         {
             RoomId = room.Id,
+            UserId = currentUserId,
             StartTime = startTime,
             EndTime = endTime,
             BaseRoomCost = priceBreakdown.BaseRoomCost,
@@ -71,7 +76,17 @@ public class BookingOrchestrator(AppDbContext dbContext, IRentalPriceCalculator 
 
         return result ?? throw new NotFoundException(nameof(Booking), bookingId);
     }
-    
+
+    public async Task<IReadOnlyList<BookingResponse>> GetByUser(CancellationToken cancellationToken)
+    {
+        var currentUserId = userContext.UserId
+            ?? throw new UnauthorizedException("User is not authenticated.");
+
+        return await dbContext.Bookings.Where(b => b.UserId == currentUserId)
+            .ToResponse()
+            .ToListAsync(cancellationToken);
+    }
+
     private async Task EnsureRoomIsAvailableAsync(int roomId, DateTime startTime, DateTime endTime, CancellationToken cancellationToken)
     {
         var todayBookings = await dbContext.Bookings

@@ -6,4 +6,5 @@ public interface IBookingOrchestrator
 {
     Task<BookingResponse> CreateAsync(CreateBookingRequest request, CancellationToken cancellationToken);
     Task<BookingResponse> GetByIdAsync(int bookingId, CancellationToken cancellationToken);
+    Task<IReadOnlyList<BookingResponse>> GetByUser(CancellationToken cancellationToken);
 }
