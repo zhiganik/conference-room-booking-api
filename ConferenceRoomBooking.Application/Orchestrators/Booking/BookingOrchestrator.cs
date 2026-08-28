@@ -16,6 +16,7 @@ public class BookingOrchestrator(AppDbContext dbContext, IRentalPriceCalculator 
     public async Task<BookingResponse> CreateAsync(CreateBookingRequest request, CancellationToken cancellationToken)
     {
         var room = await dbContext.Rooms
+            .Include(r => r.RoomServiceOptions)
             .FirstOrDefaultAsync(r => r.Id == request.RoomId, cancellationToken);
         
         if (room is null)
@@ -28,6 +29,16 @@ public class BookingOrchestrator(AppDbContext dbContext, IRentalPriceCalculator 
         
         var serviceOptionIds = request.ServiceOptionIds ?? [];
         var selectedServices = await GetServiceOptionsAsync(serviceOptionIds, cancellationToken);
+
+        var unavailableIds = serviceOptionIds
+            .Where(id => room.RoomServiceOptions.All(o => o.ServiceOptionId != id))
+            .ToList();
+
+        if (unavailableIds.Count > 0)
+        {
+            throw new ConflictException(
+                $"Service option(s) {string.Join(", ", unavailableIds)} are not offered by room '{room.Name}'.");
+        }
         
         var priceBreakdown = priceCalculator.Calculate(room.BaseHourRate, startTime, endTime, 
             selectedServices.Select(s => s.Price));
