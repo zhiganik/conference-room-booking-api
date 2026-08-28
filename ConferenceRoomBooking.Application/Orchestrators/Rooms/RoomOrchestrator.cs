@@ -93,6 +93,7 @@ public class RoomOrchestrator(AppDbContext dbContext) : IRoomOrchestrator
     {
         return await dbContext.Rooms
             .WithCapacityAtLeast(request.Capacity)
+            .WithoutOverlappingBookings(request.StartDate, request.EndDate)
             .OrderBy(r => r.Name)
             .ToAvailableResponse()
             .ToListAsync(cancellationToken);

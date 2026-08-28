@@ -10,4 +10,5 @@ public class Room
     public bool IsDeleted { get; set; }
     
     public ICollection<RoomServiceOption> RoomServiceOptions { get; set; } = new List<RoomServiceOption>();
+    public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 }
