@@ -8,7 +8,7 @@ namespace ConferenceRoomBooking.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Policy = AuthorizationPolicies.RequireUser)]
+[Authorize(Policy = AuthorizationPolicies.RequireAdmin)]
 public class RoomsController(IRoomOrchestrator roomOrchestrator) : ControllerBase
 {
     /// <summary>Creates a new conference room with its base rate and offered services.</summary>
@@ -64,6 +64,7 @@ public class RoomsController(IRoomOrchestrator roomOrchestrator) : ControllerBas
     /// <response code="200">Search completed (possibly with zero results).</response>
     [HttpGet("available")]
     [ProducesResponseType(typeof(IReadOnlyList<AvailableRoomResponse>), StatusCodes.Status200OK)]
+    [Authorize(Policy = AuthorizationPolicies.RequireUser)]
     public async Task<ActionResult<IReadOnlyList<AvailableRoomResponse>>> SearchAvailableRooms(
         [FromQuery] SearchAvailableRoomsRequest request, CancellationToken cancellationToken)
     {

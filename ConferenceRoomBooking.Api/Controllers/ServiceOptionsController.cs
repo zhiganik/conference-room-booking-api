@@ -8,7 +8,7 @@ namespace ConferenceRoomBooking.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Policy = AuthorizationPolicies.RequireUser)]
+[Authorize(Policy = AuthorizationPolicies.RequireAdmin)]
 public class ServiceOptionsController(IServiceOptionOrchestrator orchestrator) : ControllerBase
 {
     /// <response code="201">Service created successfully.</response>

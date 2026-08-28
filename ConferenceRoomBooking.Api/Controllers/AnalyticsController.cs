@@ -8,7 +8,7 @@ namespace ConferenceRoomBooking.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Policy = AuthorizationPolicies.RequireUser)]
+[Authorize(Policy = AuthorizationPolicies.RequireAdmin)]
 public class AnalyticsController(IAnalyticsOrchestrator orchestrator) : ControllerBase
 {
     /// <summary>Per-room booking count, revenue, average duration, and revenue rank.</summary>

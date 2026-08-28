@@ -30,6 +30,7 @@ public class BookingsController(IBookingOrchestrator orchestrator) : ControllerB
     [HttpGet("{bookingId:int}")]
     [ProducesResponseType(typeof(BookingResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [Authorize(Policy = AuthorizationPolicies.RequireAdmin)]
     public async Task<ActionResult<BookingResponse>> GetById([FromRoute] int bookingId,
         CancellationToken cancellationToken)
     {
