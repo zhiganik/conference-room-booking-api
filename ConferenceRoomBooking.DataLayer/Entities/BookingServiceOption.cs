@@ -4,6 +4,7 @@ public class BookingServiceOption
 {
     public int BookingId { get; set; }
     public int ServiceOptionId { get; set; }
+    public required string ServiceOptionName { get; set; }
     public decimal PriceAtBooking { get; set; }
     
     public Booking Booking { get; set; } = null!;

@@ -174,6 +174,7 @@ public static class DataSeeder
             var booking = new Booking
             {
                 RoomId = room.Id,
+                RoomName = room.Name,
                 UserId = seedUserId,
                 StartTime = startTime,
                 EndTime = endTime,
@@ -190,6 +191,7 @@ public static class DataSeeder
                 booking.BookingServiceOptions.Add(new BookingServiceOption
                 {
                     ServiceOptionId = service.Id,
+                    ServiceOptionName = service.Name,
                     PriceAtBooking = service.Price
                 });
             }

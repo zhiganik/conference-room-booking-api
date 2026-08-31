@@ -52,6 +52,7 @@ public class BookingOrchestrator(AppDbContext dbContext, IRentalPriceCalculator 
             var booking = new DataLayer.Entities.Booking
             {
                 RoomId = room.Id,
+                RoomName = room.Name,
                 UserId = currentUserId,
                 StartTime = startTime,
                 EndTime = endTime,
@@ -60,7 +61,12 @@ public class BookingOrchestrator(AppDbContext dbContext, IRentalPriceCalculator 
                 TotalPrice = priceBreakdown.TotalPrice,
                 CreatedAtUtc = DateTime.UtcNow,
                 BookingServiceOptions = selectedServices
-                    .Select(s => new BookingServiceOption { ServiceOptionId = s.Id, PriceAtBooking = s.Price })
+                    .Select(s => new BookingServiceOption
+                    {
+                        ServiceOptionId = s.Id,
+                        ServiceOptionName = s.Name,
+                        PriceAtBooking = s.Price
+                    })
                     .ToList()
             };
 

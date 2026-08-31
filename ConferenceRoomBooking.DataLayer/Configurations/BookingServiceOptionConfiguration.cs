@@ -10,6 +10,12 @@ public class BookingServiceOptionConfiguration : IEntityTypeConfiguration<Bookin
     {
         builder.HasKey(bso => new { bso.BookingId, bso.ServiceOptionId });
 
+        // Snapshot of ServiceOption.Name at booking time, mirroring PriceAtBooking:
+        // keeps the receipt stable even if the service option is later renamed.
+        builder.Property(bso => bso.ServiceOptionName)
+            .HasMaxLength(100)
+            .IsRequired();
+
         builder.Property(bso => bso.PriceAtBooking)
             .HasColumnType("decimal(18,2)")
             .IsRequired();

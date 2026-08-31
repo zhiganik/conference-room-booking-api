@@ -13,6 +13,12 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
         builder.Property(b => b.StartTime).IsRequired();
         builder.Property(b => b.EndTime).IsRequired();
 
+        // Snapshot of Room.Name at booking time: keeps historical bookings readable/findable
+        // even if the room is later renamed or soft-deleted (Room has a global query filter).
+        builder.Property(b => b.RoomName)
+            .HasMaxLength(200)
+            .IsRequired();
+
         builder.Property(b => b.BaseRoomCost)
             .HasColumnType("decimal(18,2)")
             .IsRequired();
