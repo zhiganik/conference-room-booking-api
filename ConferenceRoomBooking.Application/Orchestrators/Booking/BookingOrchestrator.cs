@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ConferenceRoomBooking.Application.Orchestrators.Booking;
 
-public class BookingOrchestrator(AppDbContext dbContext, IRentalPriceCalculator priceCalculator, 
-    IRoomAvailabilityChecker availabilityChecker, IUserContext userContext) : IBookingOrchestrator
+public class BookingOrchestrator(AppDbContext dbContext, IRentalPriceCalculator priceCalculator,
+    IRoomAvailabilityChecker availabilityChecker, IUserContext userContext, IRoomBookingLock roomBookingLock) : IBookingOrchestrator
 {
     public async Task<BookingResponse> CreateAsync(CreateBookingRequest request, CancellationToken cancellationToken)
     {
@@ -22,15 +22,13 @@ public class BookingOrchestrator(AppDbContext dbContext, IRentalPriceCalculator 
         var room = await dbContext.Rooms
             .Include(r => r.RoomServiceOptions)
             .FirstOrDefaultAsync(r => r.Id == request.RoomId, cancellationToken);
-        
+
         if (room is null)
             throw new NotFoundException(nameof(Room), request.RoomId);
-        
+
         var startTime = request.StartTime;
         var endTime = startTime.AddMinutes(request.DurationMinutes);
-        
-        await EnsureRoomIsAvailableAsync(request.RoomId, startTime, endTime, cancellationToken);
-        
+
         var serviceOptionIds = request.ServiceOptionIds ?? [];
         var selectedServices = await GetServiceOptionsAsync(serviceOptionIds, cancellationToken);
 
@@ -43,28 +41,36 @@ public class BookingOrchestrator(AppDbContext dbContext, IRentalPriceCalculator 
             throw new ConflictException(
                 $"Service option(s) {string.Join(", ", unavailableIds)} are not offered by room '{room.Name}'.");
         }
-        
-        var priceBreakdown = priceCalculator.Calculate(room.BaseHourRate, startTime, endTime, 
+
+        var priceBreakdown = priceCalculator.Calculate(room.BaseHourRate, startTime, endTime,
             selectedServices.Select(s => s.Price));
 
-        var booking = new DataLayer.Entities.Booking
+        int bookingId;
+        using (await roomBookingLock.AcquireAsync(request.RoomId, cancellationToken))
         {
-            RoomId = room.Id,
-            UserId = currentUserId,
-            StartTime = startTime,
-            EndTime = endTime,
-            BaseRoomCost = priceBreakdown.BaseRoomCost,
-            ServicesCost = priceBreakdown.ServicesCost,
-            TotalPrice = priceBreakdown.TotalPrice,
-            CreatedAtUtc = DateTime.UtcNow,
-            BookingServiceOptions = selectedServices
-                .Select(s => new BookingServiceOption { ServiceOptionId = s.Id, PriceAtBooking = s.Price })
-                .ToList()
-        };
-        
-        dbContext.Bookings.Add(booking);
-        await dbContext.SaveChangesAsync(cancellationToken);
-        return await GetByIdAsync(booking.Id, cancellationToken);
+            await EnsureRoomIsAvailableAsync(request.RoomId, startTime, endTime, cancellationToken);
+
+            var booking = new DataLayer.Entities.Booking
+            {
+                RoomId = room.Id,
+                UserId = currentUserId,
+                StartTime = startTime,
+                EndTime = endTime,
+                BaseRoomCost = priceBreakdown.BaseRoomCost,
+                ServicesCost = priceBreakdown.ServicesCost,
+                TotalPrice = priceBreakdown.TotalPrice,
+                CreatedAtUtc = DateTime.UtcNow,
+                BookingServiceOptions = selectedServices
+                    .Select(s => new BookingServiceOption { ServiceOptionId = s.Id, PriceAtBooking = s.Price })
+                    .ToList()
+            };
+
+            dbContext.Bookings.Add(booking);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            bookingId = booking.Id;
+        }
+
+        return await GetByIdAsync(bookingId, cancellationToken);
     }
 
     public async Task<BookingResponse> GetByIdAsync(int bookingId, CancellationToken cancellationToken)
@@ -89,9 +95,12 @@ public class BookingOrchestrator(AppDbContext dbContext, IRentalPriceCalculator 
 
     private async Task EnsureRoomIsAvailableAsync(int roomId, DateTime startTime, DateTime endTime, CancellationToken cancellationToken)
     {
+        var dayStart = startTime.Date;
+        var dayEnd = dayStart.AddDays(1);
+
         var todayBookings = await dbContext.Bookings
             .ForRoom(roomId)
-            .Where(b => b.StartTime.Date == startTime.Date)
+            .Where(b => b.StartTime >= dayStart && b.StartTime < dayEnd)
             .Select(b => new { b.StartTime, b.EndTime })
             .ToListAsync(cancellationToken);
 

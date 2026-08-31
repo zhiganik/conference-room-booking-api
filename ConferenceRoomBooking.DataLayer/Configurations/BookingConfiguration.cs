@@ -38,6 +38,6 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasIndex(b => b.UserId);
-        builder.HasIndex(b => b.RoomId);
+        builder.HasIndex(b => new { b.RoomId, b.StartTime, b.EndTime });
     }
 }

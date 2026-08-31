@@ -71,6 +71,7 @@ public static class DependencyConfig
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
         services.AddScoped<IUserContext, UserContext>();
+        services.AddSingleton<IRoomBookingLock, RoomBookingLock>();
         return services;
     }
 
