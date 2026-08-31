@@ -1,5 +1,4 @@
-﻿using ConferenceRoomBooking.Application.BusinessLogic.Availability;
-using ConferenceRoomBooking.Application.BusinessLogic.Pricing;
+﻿using ConferenceRoomBooking.Application.BusinessLogic.Pricing;
 using ConferenceRoomBooking.Application.Dtos.Booking;
 using ConferenceRoomBooking.Application.Exceptions;
 using ConferenceRoomBooking.Application.Mappers;
@@ -12,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 namespace ConferenceRoomBooking.Application.Orchestrators.Booking;
 
 public class BookingOrchestrator(AppDbContext dbContext, IRentalPriceCalculator priceCalculator,
-    IRoomAvailabilityChecker availabilityChecker, IUserContext userContext, IRoomBookingLock roomBookingLock) : IBookingOrchestrator
+    IUserContext userContext, IRoomBookingLock roomBookingLock) : IBookingOrchestrator
 {
     public async Task<BookingResponse> CreateAsync(CreateBookingRequest request, CancellationToken cancellationToken)
     {
@@ -95,19 +94,12 @@ public class BookingOrchestrator(AppDbContext dbContext, IRentalPriceCalculator 
 
     private async Task EnsureRoomIsAvailableAsync(int roomId, DateTime startTime, DateTime endTime, CancellationToken cancellationToken)
     {
-        var dayStart = startTime.Date;
-        var dayEnd = dayStart.AddDays(1);
-
-        var todayBookings = await dbContext.Bookings
+        var hasOverlap = await dbContext.Bookings
             .ForRoom(roomId)
-            .Where(b => b.StartTime >= dayStart && b.StartTime < dayEnd)
-            .Select(b => new { b.StartTime, b.EndTime })
-            .ToListAsync(cancellationToken);
+            .Overlapping(startTime, endTime)
+            .AnyAsync(cancellationToken);
 
-        var isAvailable = availabilityChecker.IsAvailable(startTime, endTime, 
-            todayBookings.Select(b => (b.StartTime, b.EndTime)));
-
-        if (!isAvailable)
+        if (hasOverlap)
             throw new RoomUnavailableException("Room is already booked during the requested time window.");
     }
     

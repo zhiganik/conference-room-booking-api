@@ -4,7 +4,6 @@ using ConferenceRoomBooking.Api.Services;
 using ConferenceRoomBooking.Api.Swagger;
 using ConferenceRoomBooking.Application.BusinessLogic;
 using ConferenceRoomBooking.Application.BusinessLogic.Auth;
-using ConferenceRoomBooking.Application.BusinessLogic.Availability;
 using ConferenceRoomBooking.Application.BusinessLogic.Pricing;
 using ConferenceRoomBooking.Application.Orchestrators.Analytics;
 using ConferenceRoomBooking.Application.Orchestrators.Auth;
@@ -88,7 +87,6 @@ public static class DependencyConfig
     private static IServiceCollection AddBusinessLogic(this IServiceCollection services)
     {
         services.AddSingleton<IRentalPriceCalculator, RentalPriceCalculator>();
-        services.AddSingleton<IRoomAvailabilityChecker, RoomAvailabilityChecker>();
         services.AddTransient<IJwtIssuer, JwtIssuer>();
         return services;
     }

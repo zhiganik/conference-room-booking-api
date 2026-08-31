@@ -1,12 +1,15 @@
 ﻿using ConferenceRoomBooking.Application.Dtos.Booking;
 using ConferenceRoomBooking.DataLayer.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace ConferenceRoomBooking.Application.Mappers;
 
 public static class BookingMappingExtensions
 {
     public static IQueryable<BookingResponse> ToResponse(this IQueryable<Booking> query) =>
-        query.Select(b => new BookingResponse(
+        query
+            .IgnoreQueryFilters()
+            .Select(b => new BookingResponse(
             b.Id,
             b.RoomId,
             b.Room.Name,
