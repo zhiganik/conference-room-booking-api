@@ -1,7 +1,7 @@
 services:
-  conferenceroombooking.api:
-    image: conferenceroombooking.api
-    container_name: conferenceroombooking.api
+  conferenceroombooking.web:
+    image: conferenceroombooking.web
+    container_name: conferenceroombooking.web
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
       ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=ConferenceRoomBookingDb;User Id=sa;Password=Dii1kKta9Tv8;TrustServerCertificate=True;"
@@ -9,11 +9,11 @@ services:
       - "5000:8080"
     build:
       context: .
-      dockerfile: ConferenceRoomBooking.Api/Dockerfile
+      dockerfile: ConferenceRoomBooking.Web/Dockerfile
     depends_on:
       sqlserver:
         condition: service_healthy
-      
+
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2025-latest
     container_name: conferenceroombooking.sqlserver

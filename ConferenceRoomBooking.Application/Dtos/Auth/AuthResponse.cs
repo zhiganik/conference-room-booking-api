@@ -1,3 +1,0 @@
-namespace ConferenceRoomBooking.Application.Dtos.Auth;
-
-public record AuthResponse(string AccessToken, DateTime ExpiresAt, AppUserResponse AppUser);
