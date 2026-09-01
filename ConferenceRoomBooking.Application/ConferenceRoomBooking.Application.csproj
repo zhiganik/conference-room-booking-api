@@ -7,11 +7,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Dtos\" />
+        <ProjectReference Include="..\ConferenceRoomBooking.DataLayer\ConferenceRoomBooking.DataLayer.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\ConferenceRoomBooking.DataLayer\ConferenceRoomBooking.DataLayer.csproj" />
+      <PackageReference Include="FluentValidation" Version="12.1.1" />
+      <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.12" />
     </ItemGroup>
 
 </Project>

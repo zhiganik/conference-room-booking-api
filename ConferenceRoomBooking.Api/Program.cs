@@ -1,11 +1,33 @@
 using ConferenceRoomBooking.Api.Configurations;
+using ConferenceRoomBooking.Api.Startup;
+using Serilog;
 
-var builder = WebApplication.CreateBuilder(args);
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
-builder.Services.AddDependencies(builder.Configuration);
+try
+{
+    var builder = WebApplication.CreateBuilder(args);
 
-var app = builder.Build();
+    builder.Host.UseSerilog((context, services, loggerConfiguration) =>
+        loggerConfiguration.ReadFrom.Configuration(context.Configuration));
+    
+    builder.Services.AddDependencies(builder.Configuration);
+    var app = builder.Build();
 
-app.UseApplicationPipeline();
-
-app.Run();
+    app.UseApplicationPipeline();
+    
+    await RoleSeeder.SeedRolesAsync(app.Services);
+    await DataSeeder.SeedAsync(app.Services);
+    
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "ConferenceRoomBooking.Api terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
