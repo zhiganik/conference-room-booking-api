@@ -1,3 +1,4 @@
+using ConferenceRoomBooking.Dal.SqlRepositories.Migrations;
 using ConferenceRoomBooking.Web.Configurations;
 using ConferenceRoomBooking.Web.Startup;
 using Serilog;
@@ -18,6 +19,7 @@ try
 
     app.UseApplicationPipeline();
 
+    DatabaseMigrator.Migrate(app.Configuration);
     await DataSeeder.SeedAsync(app.Services);
     
     app.Run();

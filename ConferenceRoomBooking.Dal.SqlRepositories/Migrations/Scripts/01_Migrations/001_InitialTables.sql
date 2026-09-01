@@ -1,3 +1,9 @@
+IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = N'MZhehistovskyi')
+BEGIN
+    EXEC('CREATE SCHEMA [MZhehistovskyi]');
+END
+GO
+
 CREATE TABLE [MZhehistovskyi].[Users]
 (
     [Id]           UNIQUEIDENTIFIER NOT NULL DEFAULT NEWSEQUENTIALID(),

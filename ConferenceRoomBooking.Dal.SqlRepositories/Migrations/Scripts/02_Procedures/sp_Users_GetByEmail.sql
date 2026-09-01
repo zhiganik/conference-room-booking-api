@@ -1,4 +1,4 @@
-CREATE PROCEDURE [MZhehistovskyi].[sp_Users_GetByEmail]
+CREATE OR ALTER PROCEDURE [MZhehistovskyi].[sp_Users_GetByEmail]
     @Email NVARCHAR(256)
 AS
 BEGIN

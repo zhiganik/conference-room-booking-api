@@ -2,9 +2,6 @@ using System.Security.Cryptography;
 
 namespace ConferenceRoomBooking.Bll.Auth;
 
-// PBKDF2 (Rfc2898DeriveBytes) based hasher, replacing ASP.NET Identity's PasswordHasher<TUser>.
-// Self-describing string so the work factor can change later without breaking existing hashes:
-// "{iterations}.{saltBase64}.{hashBase64}".
 public class PasswordHasher : IPasswordHasher
 {
     private const int SaltSizeBytes = 16;
