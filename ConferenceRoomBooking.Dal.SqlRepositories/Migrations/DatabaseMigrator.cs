@@ -1,6 +1,8 @@
+using Azure.Identity;
 using DbUp;
 using DbUp.Engine;
 using DbUp.Support;
+using DbUp.SqlServer;
 using Microsoft.Extensions.Configuration;
 
 namespace ConferenceRoomBooking.Dal.SqlRepositories.Migrations;
@@ -24,9 +26,10 @@ public static class DatabaseMigrator
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
 
         var assembly = typeof(DatabaseMigrator).Assembly;
+        var connectionManager = new AzureSqlConnectionManager(connectionString, new DefaultAzureCredential());
 
         var upgrader = DeployChanges.To
-            .SqlDatabase(connectionString)
+            .SqlDatabase(connectionManager, "MZhehistovskyi")
             .WithScriptsEmbeddedInAssembly(assembly, IsMigrationScript, new SqlScriptOptions { ScriptType = ScriptType.RunOnce })
             .WithScriptsEmbeddedInAssembly(assembly, IsProcedureScript, new SqlScriptOptions { ScriptType = ScriptType.RunAlways })
             .LogToConsole()
@@ -40,9 +43,6 @@ public static class DatabaseMigrator
         }
     }
 
-    // MSBuild prefixes an underscore onto embedded-resource path segments that start with a digit, so
-    // "01_Migrations" becomes "_01_Migrations" in the manifest resource name — verified against the
-    // actual built assembly, not assumed.
     private static bool IsMigrationScript(string resourceName) =>
         resourceName.Contains("._01_Migrations.", StringComparison.OrdinalIgnoreCase)
         && resourceName.EndsWith(".sql", StringComparison.OrdinalIgnoreCase);
