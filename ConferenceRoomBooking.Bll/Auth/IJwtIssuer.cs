@@ -4,5 +4,7 @@ namespace ConferenceRoomBooking.Bll.Auth;
 
 public interface IJwtIssuer
 {
-    string GenerateAccessToken(User user);
+    JwtToken GenerateAccessToken(User user);
 }
+
+public record JwtToken(string AccessToken, DateTime ExpiresAtUtc);

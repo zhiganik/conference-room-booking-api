@@ -56,5 +56,15 @@
   <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <ItemGroup>
     <Folder Include="Properties" />
+    <Folder Include="Security" />
+    <Folder Include="MZhehistovskyi" />
+    <Folder Include="MZhehistovskyi\Tables" />
+    <Folder Include="MZhehistovskyi\Stored Procedures" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="Security\MZhehistovskyi.sql" />
+    <Build Include="MZhehistovskyi\Tables\Users.sql" />
+    <Build Include="MZhehistovskyi\Stored Procedures\sp_Users_Create.sql" />
+    <Build Include="MZhehistovskyi\Stored Procedures\sp_Users_GetByEmail.sql" />
   </ItemGroup>
 </Project>

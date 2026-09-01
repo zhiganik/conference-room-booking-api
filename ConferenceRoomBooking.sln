@@ -6,9 +6,6 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConferenceRoomBooking.Web", "ConferenceRoomBooking.Web\ConferenceRoomBooking.Web.csproj", "{00A36421-7740-47BE-ACA5-CA604D3C4960}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DFA96841-6E58-4B82-AE87-A62E78F18782}"
-	ProjectSection(SolutionItems) = preProject
-		compose.yaml = compose.yaml
-	EndProjectSection
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
 EndProject
@@ -17,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConferenceRoomBooking.Bll", "ConferenceRoomBooking.Bll\ConferenceRoomBooking.Bll.csproj", "{F8B1A2D2-8854-4D82-8F21-DF73D13FD66B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConferenceRoomBooking.Dal.SqlRepositories", "ConferenceRoomBooking.Dal.SqlRepositories\ConferenceRoomBooking.Dal.SqlRepositories.csproj", "{4B2747D6-F28D-4DB5-BCFF-77EB2DC1E8DD}"
+EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "ConferenceRoomBooking.Database", "ConferenceRoomBooking.Database\ConferenceRoomBooking.Database.sqlproj", "{D1003C4C-5E0D-4098-A626-0D4AA5DADD8B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -84,6 +83,16 @@ Global
 		{4B2747D6-F28D-4DB5-BCFF-77EB2DC1E8DD}.Release|x64.Build.0 = Release|Any CPU
 		{4B2747D6-F28D-4DB5-BCFF-77EB2DC1E8DD}.Release|x86.ActiveCfg = Release|Any CPU
 		{4B2747D6-F28D-4DB5-BCFF-77EB2DC1E8DD}.Release|x86.Build.0 = Release|Any CPU
+		{D1003C4C-5E0D-4098-A626-0D4AA5DADD8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1003C4C-5E0D-4098-A626-0D4AA5DADD8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1003C4C-5E0D-4098-A626-0D4AA5DADD8B}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{D1003C4C-5E0D-4098-A626-0D4AA5DADD8B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D1003C4C-5E0D-4098-A626-0D4AA5DADD8B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D1003C4C-5E0D-4098-A626-0D4AA5DADD8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1003C4C-5E0D-4098-A626-0D4AA5DADD8B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1003C4C-5E0D-4098-A626-0D4AA5DADD8B}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{D1003C4C-5E0D-4098-A626-0D4AA5DADD8B}.Release|x64.ActiveCfg = Release|Any CPU
+		{D1003C4C-5E0D-4098-A626-0D4AA5DADD8B}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
