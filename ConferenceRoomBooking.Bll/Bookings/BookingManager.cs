@@ -30,8 +30,8 @@ public class BookingManager(
 
         var selectedServices = await ResolveServiceOptionsAsync(ids, cancellationToken);
 
-        var unavailableIds = ids.Except(room.Services.Select(s => s.Id)).ToList();
-        if (unavailableIds.Count > 0)
+        var unavailableIds = ids.Except(room.Services.Select(s => s.Id));
+        if (unavailableIds.Count() > 0)
         {
             throw new ConflictException(
                 $"Service option(s) {string.Join(", ", unavailableIds)} are not offered by room '{room.Name}'.");
@@ -83,7 +83,7 @@ public class BookingManager(
             ? userId
             : throw new UnauthorizedException("User is not authenticated.");
 
-    private async Task<List<ServiceOption>> ResolveServiceOptionsAsync(IReadOnlyCollection<int> serviceOptionIds, CancellationToken cancellationToken)
+    private async Task<IEnumerable<ServiceOption>> ResolveServiceOptionsAsync(IReadOnlyCollection<int> serviceOptionIds, CancellationToken cancellationToken)
     {
         if (serviceOptionIds.Count == 0)
         {
@@ -97,6 +97,6 @@ public class BookingManager(
             throw new NotFoundException(nameof(ServiceOption), string.Join(", ", missingIds));
         }
 
-        return existing.ToList();
+        return existing;
     }
 }

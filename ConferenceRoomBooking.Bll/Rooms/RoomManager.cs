@@ -62,7 +62,7 @@ public class RoomManager(IRoomRepository roomRepository, IServiceOptionRepositor
     public async Task<IReadOnlyList<AvailableRoom>> SearchAvailableAsync(DateTime startDate, DateTime endDate, int capacity, CancellationToken cancellationToken) =>
         await roomRepository.SearchAvailableAsync(capacity, startDate, endDate, cancellationToken);
 
-    private async Task<List<ServiceOption>> ResolveServiceOptionsAsync(IReadOnlyCollection<int> serviceOptionIds, CancellationToken cancellationToken)
+    private async Task<IEnumerable<ServiceOption>> ResolveServiceOptionsAsync(IReadOnlyCollection<int> serviceOptionIds, CancellationToken cancellationToken)
     {
         if (serviceOptionIds.Count == 0)
         {
@@ -70,12 +70,13 @@ public class RoomManager(IRoomRepository roomRepository, IServiceOptionRepositor
         }
 
         var existing = await serviceOptionRepository.GetByIdsAsync(serviceOptionIds, cancellationToken);
+
         if (existing.Count != serviceOptionIds.Count)
         {
             var missingIds = serviceOptionIds.Except(existing.Select(s => s.Id));
             throw new NotFoundException(nameof(ServiceOption), string.Join(", ", missingIds));
         }
 
-        return existing.ToList();
+        return existing;
     }
 }

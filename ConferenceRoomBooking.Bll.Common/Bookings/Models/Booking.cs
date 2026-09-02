@@ -12,5 +12,5 @@ public class Booking
     public decimal ServicesCost { get; set; }
     public decimal TotalPrice { get; set; }
     public DateTime CreatedAtUtc { get; set; }
-    public List<BookedServiceOption> Services { get; set; } = [];
+    public IReadOnlyCollection<BookedServiceOption> Services { get; set; } = [];
 }

@@ -129,8 +129,6 @@ public class RoomRepository(IDbConnectionFactory connectionFactory, IMapper mapp
         parameter.TypeName = "MZhehistovskyi.IntIdList";
     }
 
-    // sp_Rooms_GetById/Create return one row per linked service option (zero rows if none) —
-    // flatten that back into Room entities with a populated ServiceOptions list.
     private static async Task<List<RoomEntity>> ReadRoomsAsync(SqlDataReader reader, CancellationToken cancellationToken)
     {
         var rooms = new Dictionary<int, RoomEntity>();
