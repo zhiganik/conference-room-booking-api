@@ -6,11 +6,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ConferenceRoomBooking.Web.Controllers;
 
+/// <summary>Registration and login. Both endpoints return a JWT access token on success.</summary>
 [ApiController]
 [Route("api/[controller]")]
 [AllowAnonymous]
 public class AuthController(IAuthManager authManager, IMapper mapper) : ControllerBase
 {
+    /// <summary>Creates a new account with the <c>User</c> role.</summary>
+    /// <param name="request">The account email and password to register.</param>
     /// <response code="200">Registration succeeded — returns an access token.</response>
     /// <response code="409">Email already registered, or password doesn't meet requirements.</response>
     [HttpPost("register")]
@@ -23,6 +26,8 @@ public class AuthController(IAuthManager authManager, IMapper mapper) : Controll
         return mapper.Map<AuthResponse>(result);
     }
 
+    /// <summary>Authenticates an existing account.</summary>
+    /// <param name="request">The account email and password.</param>
     /// <response code="200">Login succeeded — returns an access token.</response>
     /// <response code="401">Invalid email or password.</response>
     [HttpPost("login")]

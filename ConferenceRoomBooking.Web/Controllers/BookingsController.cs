@@ -7,11 +7,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ConferenceRoomBooking.Web.Controllers;
 
+/// <summary>Booking creation and retrieval, with server-computed pricing.</summary>
 [ApiController]
 [Route("api/[controller]")]
 [Authorize(Policy = AuthorizationPolicies.RequireUser)]
 public class BookingsController(IBookingManager bookingManager, IMapper mapper) : ControllerBase
 {
+    /// <summary>Books a room for the current user, optionally with extra services.</summary>
+    /// <param name="request">The room, start time, duration, and selected service option ids.</param>
     /// <response code="201">Booking created — includes calculated total cost.</response>
     /// <response code="404">Room or a selected service doesn't exist.</response>
     /// <response code="409">Room is already booked for the requested window.</response>
@@ -28,6 +31,8 @@ public class BookingsController(IBookingManager bookingManager, IMapper mapper) 
         return CreatedAtAction(nameof(GetById), new { bookingId = response.Id }, response);
     }
 
+    /// <summary>Retrieves a single booking by ID.</summary>
+    /// <param name="bookingId">The booking's id.</param>
     /// <response code="200">Booking found.</response>
     /// <response code="404">No booking exists with the given ID.</response>
     [HttpGet("{bookingId:int}")]
@@ -41,8 +46,8 @@ public class BookingsController(IBookingManager bookingManager, IMapper mapper) 
         return mapper.Map<BookingResponse>(booking);
     }
 
-    /// <response code="200">Booking found.</response>
-    /// <response code="404">No booking exists with the given ID.</response>
+    /// <summary>Retrieves every booking made by the current user.</summary>
+    /// <response code="200">Search completed (possibly with zero results).</response>
     [HttpGet("my")]
     [ProducesResponseType(typeof(IReadOnlyList<BookingResponse>), StatusCodes.Status200OK)]
     public async Task<ActionResult<IReadOnlyList<BookingResponse>>> GetMyBookings(CancellationToken cancellationToken)

@@ -122,10 +122,6 @@ public class BookingRepository(IDbConnectionFactory connectionFactory, IMapper m
         parameter.TypeName = "MZhehistovskyi.BookingServiceOptionList";
     }
 
-    // sp_Bookings_GetById/GetByUserId return one row per booked service option (zero rows if none) —
-    // flatten that back into Booking entities with a populated ServiceOptions list. A List alongside
-    // the lookup Dictionary keeps GetByUserId's ORDER BY intact (Dictionary enumeration order isn't
-    // a guaranteed contract).
     private static async Task<List<BookingEntity>> ReadBookingsAsync(SqlDataReader reader, CancellationToken cancellationToken)
     {
         var bookings = new List<BookingEntity>();

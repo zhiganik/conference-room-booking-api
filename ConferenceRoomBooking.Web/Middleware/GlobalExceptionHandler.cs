@@ -44,26 +44,6 @@ public class GlobalExceptionHandler(
 
         await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
         return true;
-        
-        // I have some problems with swagger when return this. Swagger does not give info below while Postman does
-        // httpContext.Response.StatusCode = (int)statusCode;
-        //
-        // var problemDetails = new ProblemDetails
-        // {
-        //     Status = (int)statusCode,
-        //     Title = title,
-        //     Type = exception.GetType().Name,
-        //     Detail = exception is AppException appException
-        //         ? appException.Message
-        //         : "An unexpected error occurred. Please contact support if this persists."
-        // };
-        //
-        // return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
-        // {
-        //     HttpContext = httpContext,
-        //     Exception = exception,
-        //     ProblemDetails = problemDetails
-        // });
     }
     
     private static (HttpStatusCode StatusCode, string Title) MapException(Exception exception) => exception switch

@@ -7,12 +7,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ConferenceRoomBooking.Web.Controllers;
 
+/// <summary>Conference room CRUD and availability search.</summary>
 [ApiController]
 [Route("api/[controller]")]
 [Authorize(Policy = AuthorizationPolicies.RequireAdmin)]
 public class RoomsController(IRoomManager roomManager, IMapper mapper) : ControllerBase
 {
     /// <summary>Creates a new conference room with its base rate and offered services.</summary>
+    /// <param name="request">The room's name, capacity, base hourly rate, and offered service option ids.</param>
     /// <response code="201">Room created successfully.</response>
     [HttpPost]
     [ProducesResponseType(typeof(RoomResponse), StatusCodes.Status201Created)]
@@ -26,6 +28,7 @@ public class RoomsController(IRoomManager roomManager, IMapper mapper) : Control
     }
 
     /// <summary>Retrieves a single room by ID.</summary>
+    /// <param name="roomId">The room's id.</param>
     /// <response code="200">Room found.</response>
     /// <response code="404">No room exists with the given ID.</response>
     [HttpGet("{roomId:int}")]
@@ -39,6 +42,8 @@ public class RoomsController(IRoomManager roomManager, IMapper mapper) : Control
     }
 
     /// <summary>Updates an existing room's rate, capacity, and offered services.</summary>
+    /// <param name="roomId">The room's id.</param>
+    /// <param name="request">The room's new name, capacity, base hourly rate, and offered service option ids.</param>
     /// <response code="200">Room updated successfully.</response>
     /// <response code="404">No room exists with the given ID.</response>
     [HttpPut("{roomId:int}")]
@@ -53,6 +58,7 @@ public class RoomsController(IRoomManager roomManager, IMapper mapper) : Control
     }
 
     /// <summary>Soft-deletes a room.</summary>
+    /// <param name="roomId">The room's id.</param>
     /// <response code="204">Room deleted successfully.</response>
     /// <response code="404">No room exists with the given ID.</response>
     [HttpDelete("{roomId:int}")]
@@ -65,6 +71,7 @@ public class RoomsController(IRoomManager roomManager, IMapper mapper) : Control
     }
 
     /// <summary>Searches for rooms available on a given date/time range with sufficient capacity.</summary>
+    /// <param name="request">The requested date/time window and minimum capacity.</param>
     /// <response code="200">Search completed (possibly with zero results).</response>
     [HttpGet("available")]
     [ProducesResponseType(typeof(IReadOnlyList<AvailableRoomResponse>), StatusCodes.Status200OK)]

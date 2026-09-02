@@ -2,11 +2,6 @@ using System.Collections.Concurrent;
 
 namespace ConferenceRoomBooking.Bll.Bookings;
 
-/// <summary>
-/// Singleton, per-room mutex used to prevent double-booking a room when two requests
-/// race the availability check + insert. Register as a singleton so the semaphores
-/// are shared across all scoped manager instances.
-/// </summary>
 public class RoomBookingLock : IRoomBookingLock
 {
     private readonly ConcurrentDictionary<int, SemaphoreSlim> _locksByRoomId = new();

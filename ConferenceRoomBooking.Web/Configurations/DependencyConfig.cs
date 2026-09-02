@@ -67,7 +67,6 @@ public static class DependencyConfig
 
     private static IServiceCollection AddAutoMapperProfiles(this IServiceCollection services)
     {
-        // Scans the Dal.SqlRepositories (Entity <-> Model) and Web (Model <-> Dto) assemblies for Profiles.
         services.AddAutoMapper(cfg => { },
             typeof(ConferenceRoomBooking.Dal.SqlRepositories.Mapping.AutomapperConfig).Assembly,
             typeof(ConferenceRoomBooking.Web.Mapping.AutomapperConfig).Assembly);

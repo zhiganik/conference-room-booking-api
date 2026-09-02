@@ -12,15 +12,6 @@ using ConferenceRoomBooking.Bll.Common.Shared.Security;
 
 namespace ConferenceRoomBooking.Web.Startup;
 
-// Seeds directly through the repositories (not the managers) — same as the old EF version, which
-// wrote straight to AppDbContext/UserManager rather than going through the orchestrators (and, for
-// bookings, needs a UserId that isn't tied to an HTTP request the way IBookingManager's is).
-// Users, rooms, and service options are fully idempotent (skip-if-already-present by email/name).
-// Sample bookings are idempotent within the same calendar day (skip-if-already-overlapping) but not
-// across day boundaries — their start times are computed relative to DateTime.UtcNow.Date so the
-// demo data always looks recent, which means a run on a later day computes different timestamps and
-// won't match yesterday's rows. Safe for repeated restarts during a single day; running it again on
-// a fresh day adds another batch alongside the previous one.
 public static class DataSeeder
 {
     private const string SeedUserEmail = "seed.bookings@conference-room-booking.local";

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ConferenceRoomBooking.Web.Controllers;
 
+/// <summary>Read-only business reports on room and service performance.</summary>
 [ApiController]
 [Route("api/[controller]")]
 [Authorize(Policy = AuthorizationPolicies.RequireAdmin)]

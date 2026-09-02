@@ -23,6 +23,5 @@ BEGIN
 
     COMMIT TRANSACTION;
 
-    -- Reuse the same flattened Room+Services projection GetById returns, in the same round trip.
     EXEC [MZhehistovskyi].[sp_Rooms_GetById] @Id = (SELECT [Id] FROM @RoomIds);
 END
