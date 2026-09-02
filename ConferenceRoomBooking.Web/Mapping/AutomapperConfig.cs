@@ -1,7 +1,9 @@
 using AutoMapper;
 using ConferenceRoomBooking.Bll.Common.Auth.Models;
+using ConferenceRoomBooking.Bll.Common.Rooms.Models;
 using ConferenceRoomBooking.Bll.Common.ServiceOptions.Models;
 using ConferenceRoomBooking.Web.Dtos.Auth;
+using ConferenceRoomBooking.Web.Dtos.Rooms;
 using ConferenceRoomBooking.Web.Dtos.ServiceOptions;
 
 namespace ConferenceRoomBooking.Web.Mapping;
@@ -14,5 +16,10 @@ public class AutomapperConfig : Profile
             .ForMember(dest => dest.AppUser, opt => opt.MapFrom(src => new AppUserResponse(src.UserId.ToString(), src.Email)));
 
         CreateMap<ServiceOption, ServiceOptionResponse>();
+
+        CreateMap<Room, RoomResponse>()
+            .ForMember(dest => dest.BaseHourlyRate, opt => opt.MapFrom(src => src.BaseHourRate));
+
+        CreateMap<AvailableRoom, AvailableRoomResponse>();
     }
 }

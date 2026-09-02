@@ -1,7 +1,9 @@
 using AutoMapper;
 using ConferenceRoomBooking.Bll.Common.Auth.Models;
+using ConferenceRoomBooking.Bll.Common.Rooms.Models;
 using ConferenceRoomBooking.Bll.Common.ServiceOptions.Models;
 using ConferenceRoomBooking.Dal.SqlRepositories.Auth.Entities;
+using ConferenceRoomBooking.Dal.SqlRepositories.Rooms.Entities;
 using ConferenceRoomBooking.Dal.SqlRepositories.ServiceOptions.Entities;
 
 namespace ConferenceRoomBooking.Dal.SqlRepositories.Mapping;
@@ -13,5 +15,8 @@ public class AutomapperConfig : Profile
     {
         CreateMap<UserEntity, User>();
         CreateMap<ServiceOptionEntity, ServiceOption>();
+
+        CreateMap<RoomEntity, Room>()
+            .ForMember(dest => dest.Services, opt => opt.MapFrom(src => src.ServiceOptions));
     }
 }
