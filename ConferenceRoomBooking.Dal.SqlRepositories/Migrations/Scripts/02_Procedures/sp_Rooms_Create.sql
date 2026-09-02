@@ -23,5 +23,6 @@ BEGIN
 
     COMMIT TRANSACTION;
 
-    EXEC [MZhehistovskyi].[sp_Rooms_GetById] @Id = (SELECT [Id] FROM @RoomIds);
+    DECLARE @NewRoomId INT = (SELECT [Id] FROM @RoomIds);
+    EXEC [MZhehistovskyi].[sp_Rooms_GetById] @Id = @NewRoomId;
 END

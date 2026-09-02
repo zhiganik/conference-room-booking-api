@@ -9,7 +9,7 @@ SELECT
 FROM [MZhehistovskyi].[Rooms] r
 LEFT JOIN [MZhehistovskyi].[Bookings] b ON r.[Id] = b.[RoomId]
 WHERE r.[IsDeleted] = 0
-GROUP BY r.[Id], r.[Name];
+GROUP BY r.[Id], r.[Name];  
 GO
 
 CREATE VIEW [MZhehistovskyi].[ServicePerformanceView] AS
