@@ -3,7 +3,7 @@
 namespace ConferenceRoomBooking.Web.Dtos.Rooms;
 
 public record  RoomResponse(
-    int Id,
+    Guid Id,
     string Name,
     int Capacity,
     decimal BaseHourlyRate,

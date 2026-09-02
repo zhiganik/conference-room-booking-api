@@ -1,5 +1,5 @@
 CREATE OR ALTER PROCEDURE [MZhehistovskyi].[sp_Bookings_Create]
-    @RoomId         INT,
+    @RoomId         UNIQUEIDENTIFIER,
     @RoomName       NVARCHAR(200),
     @UserId         UNIQUEIDENTIFIER,
     @StartTime      DATETIME2(3),
@@ -13,7 +13,7 @@ BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
 
-    DECLARE @BookingIds TABLE ([Id] INT);
+    DECLARE @BookingIds TABLE ([Id] UNIQUEIDENTIFIER);
 
     BEGIN TRANSACTION;
 

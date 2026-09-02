@@ -1,5 +1,5 @@
 CREATE OR ALTER PROCEDURE [MZhehistovskyi].[sp_ServiceOptions_GetByIds]
-    @Ids [MZhehistovskyi].[IntIdList] READONLY
+    @Ids [MZhehistovskyi].[GuidIdList] READONLY
 AS
 BEGIN
     SET NOCOUNT ON;

@@ -32,7 +32,7 @@ public class RoomRepository(IDbConnectionFactory connectionFactory, IMapper mapp
         return mapper.Map<Room>(entities.Single());
     }
 
-    public async Task<Room?> GetByIdAsync(int roomId, CancellationToken cancellationToken)
+    public async Task<Room?> GetByIdAsync(Guid roomId, CancellationToken cancellationToken)
     {
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
@@ -87,7 +87,7 @@ public class RoomRepository(IDbConnectionFactory connectionFactory, IMapper mapp
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
-    public async Task SoftDeleteAsync(int roomId, CancellationToken cancellationToken)
+    public async Task SoftDeleteAsync(Guid roomId, CancellationToken cancellationToken)
     {
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
@@ -122,7 +122,7 @@ public class RoomRepository(IDbConnectionFactory connectionFactory, IMapper mapp
         {
             results.Add(new AvailableRoom
             {
-                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                Id = reader.GetGuid(reader.GetOrdinal("Id")),
                 Name = reader.GetString(reader.GetOrdinal("Name")),
                 Capacity = reader.GetInt32(reader.GetOrdinal("Capacity")),
                 BaseHourlyRate = reader.GetDecimal(reader.GetOrdinal("BaseHourRate"))
@@ -132,10 +132,10 @@ public class RoomRepository(IDbConnectionFactory connectionFactory, IMapper mapp
         return results;
     }
 
-    private static void AddServiceOptionIdsParameter(SqlCommand command, IEnumerable<int> serviceOptionIds)
+    private static void AddServiceOptionIdsParameter(SqlCommand command, IEnumerable<Guid> serviceOptionIds)
     {
         var table = new DataTable();
-        table.Columns.Add("Id", typeof(int));
+        table.Columns.Add("Id", typeof(Guid));
 
         foreach (var id in serviceOptionIds)
         {
@@ -144,16 +144,16 @@ public class RoomRepository(IDbConnectionFactory connectionFactory, IMapper mapp
 
         var parameter = command.Parameters.AddWithValue("@ServiceOptionIds", table);
         parameter.SqlDbType = SqlDbType.Structured;
-        parameter.TypeName = "MZhehistovskyi.IntIdList";
+        parameter.TypeName = "MZhehistovskyi.GuidIdList";
     }
 
     private static async Task<List<RoomEntity>> ReadRoomsAsync(SqlDataReader reader, CancellationToken cancellationToken)
     {
-        var rooms = new Dictionary<int, RoomEntity>();
+        var rooms = new Dictionary<Guid, RoomEntity>();
 
         while (await reader.ReadAsync(cancellationToken))
         {
-            var roomId = reader.GetInt32(reader.GetOrdinal("Id"));
+            var roomId = reader.GetGuid(reader.GetOrdinal("Id"));
             if (!rooms.TryGetValue(roomId, out var room))
             {
                 room = new RoomEntity
@@ -173,7 +173,7 @@ public class RoomRepository(IDbConnectionFactory connectionFactory, IMapper mapp
             {
                 room.ServiceOptions.Add(new ServiceOptionEntity
                 {
-                    Id = reader.GetInt32(serviceOptionIdOrdinal),
+                    Id = reader.GetGuid(serviceOptionIdOrdinal),
                     Name = reader.GetString(reader.GetOrdinal("ServiceOptionName")),
                     Price = reader.GetDecimal(reader.GetOrdinal("ServiceOptionPrice"))
                 });

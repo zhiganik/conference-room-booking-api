@@ -1,5 +1,5 @@
 CREATE OR ALTER PROCEDURE [MZhehistovskyi].[sp_ServiceOptions_Delete]
-    @Id INT
+    @Id UNIQUEIDENTIFIER
 AS
 BEGIN
     SET NOCOUNT ON;

@@ -2,13 +2,13 @@ CREATE OR ALTER PROCEDURE [MZhehistovskyi].[sp_Rooms_Create]
     @Name             NVARCHAR(200),
     @Capacity         INT,
     @BaseHourRate     DECIMAL(18,2),
-    @ServiceOptionIds [MZhehistovskyi].[IntIdList] READONLY
+    @ServiceOptionIds [MZhehistovskyi].[GuidIdList] READONLY
 AS
 BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
 
-    DECLARE @RoomIds TABLE ([Id] INT);
+    DECLARE @RoomIds TABLE ([Id] UNIQUEIDENTIFIER);
 
     BEGIN TRANSACTION;
 
@@ -23,6 +23,6 @@ BEGIN
 
     COMMIT TRANSACTION;
 
-    DECLARE @NewRoomId INT = (SELECT [Id] FROM @RoomIds);
+    DECLARE @NewRoomId UNIQUEIDENTIFIER = (SELECT [Id] FROM @RoomIds);
     EXEC [MZhehistovskyi].[sp_Rooms_GetById] @Id = @NewRoomId;
 END

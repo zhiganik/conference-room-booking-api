@@ -31,10 +31,10 @@ public class RoomsController(IRoomManager roomManager, IMapper mapper) : Control
     /// <param name="roomId">The room's id.</param>
     /// <response code="200">Room found.</response>
     /// <response code="404">No room exists with the given ID.</response>
-    [HttpGet("{roomId:int}")]
+    [HttpGet("{roomId:guid}")]
     [ProducesResponseType(typeof(RoomResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<RoomResponse>> GetRoomById([FromRoute] int roomId,
+    public async Task<ActionResult<RoomResponse>> GetRoomById([FromRoute] Guid roomId,
         CancellationToken cancellationToken)
     {
         var room = await roomManager.GetByIdAsync(roomId, cancellationToken);
@@ -46,10 +46,10 @@ public class RoomsController(IRoomManager roomManager, IMapper mapper) : Control
     /// <param name="request">The room's new name, capacity, base hourly rate, and offered service option ids.</param>
     /// <response code="200">Room updated successfully.</response>
     /// <response code="404">No room exists with the given ID.</response>
-    [HttpPut("{roomId:int}")]
+    [HttpPut("{roomId:guid}")]
     [ProducesResponseType(typeof(RoomResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<RoomResponse>> UpdateRoom([FromRoute] int roomId, [FromBody] UpdateRoomRequest request,
+    public async Task<ActionResult<RoomResponse>> UpdateRoom([FromRoute] Guid roomId, [FromBody] UpdateRoomRequest request,
         CancellationToken cancellationToken)
     {
         var room = await roomManager.UpdateAsync(roomId, request.Name, request.Capacity, request.BaseHourRate,
@@ -61,10 +61,10 @@ public class RoomsController(IRoomManager roomManager, IMapper mapper) : Control
     /// <param name="roomId">The room's id.</param>
     /// <response code="204">Room deleted successfully.</response>
     /// <response code="404">No room exists with the given ID.</response>
-    [HttpDelete("{roomId:int}")]
+    [HttpDelete("{roomId:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> DeleteRoom([FromRoute] int roomId, CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteRoom([FromRoute] Guid roomId, CancellationToken cancellationToken)
     {
         await roomManager.DeleteAsync(roomId, cancellationToken);
         return NoContent();

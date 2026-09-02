@@ -1,5 +1,5 @@
 CREATE OR ALTER PROCEDURE [MZhehistovskyi].[sp_Bookings_GetById]
-    @Id INT
+    @Id UNIQUEIDENTIFIER
 AS
 BEGIN
     SET NOCOUNT ON;

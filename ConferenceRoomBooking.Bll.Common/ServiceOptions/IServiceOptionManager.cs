@@ -15,17 +15,17 @@ public interface IServiceOptionManager
 
     /// <summary>Retrieves a service option by id.</summary>
     /// <exception cref="NotFoundException">No service option exists with the given id.</exception>
-    Task<ServiceOption> GetByIdAsync(int serviceOptionId, CancellationToken cancellationToken);
+    Task<ServiceOption> GetByIdAsync(Guid serviceOptionId, CancellationToken cancellationToken);
 
     /// <summary>Updates an existing service option's name and price.</summary>
     /// <exception cref="NotFoundException">No service option exists with the given id.</exception>
     /// <exception cref="ConflictException">Another service option already has the new name.</exception>
-    Task<ServiceOption> UpdateAsync(int serviceOptionId, string name, decimal price, CancellationToken cancellationToken);
+    Task<ServiceOption> UpdateAsync(Guid serviceOptionId, string name, decimal price, CancellationToken cancellationToken);
 
     /// <summary>Deletes a service option.</summary>
     /// <exception cref="NotFoundException">No service option exists with the given id.</exception>
     /// <exception cref="ConflictException">The service option is still offered by one or more rooms.</exception>
-    Task DeleteAsync(int serviceOptionId, CancellationToken cancellationToken);
+    Task DeleteAsync(Guid serviceOptionId, CancellationToken cancellationToken);
 
     /// <summary>Searches service options by a name substring.</summary>
     /// <param name="name">Substring to match against the name, or <see langword="null"/>/empty to return all.</param>

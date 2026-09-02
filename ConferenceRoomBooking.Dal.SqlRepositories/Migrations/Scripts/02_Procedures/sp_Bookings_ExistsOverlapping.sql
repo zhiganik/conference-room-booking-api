@@ -1,5 +1,5 @@
 CREATE OR ALTER PROCEDURE [MZhehistovskyi].[sp_Bookings_ExistsOverlapping]
-    @RoomId    INT,
+    @RoomId    UNIQUEIDENTIFIER,
     @StartTime DATETIME2(3),
     @EndTime   DATETIME2(3)
 AS

@@ -35,11 +35,11 @@ public class BookingsController(IBookingManager bookingManager, IMapper mapper) 
     /// <param name="bookingId">The booking's id.</param>
     /// <response code="200">Booking found.</response>
     /// <response code="404">No booking exists with the given ID.</response>
-    [HttpGet("{bookingId:int}")]
+    [HttpGet("{bookingId:guid}")]
     [ProducesResponseType(typeof(BookingResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [Authorize(Policy = AuthorizationPolicies.RequireAdmin)]
-    public async Task<ActionResult<BookingResponse>> GetById([FromRoute] int bookingId,
+    public async Task<ActionResult<BookingResponse>> GetById([FromRoute] Guid bookingId,
         CancellationToken cancellationToken)
     {
         var booking = await bookingManager.GetByIdAsync(bookingId, cancellationToken);

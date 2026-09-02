@@ -2,8 +2,8 @@ namespace ConferenceRoomBooking.Bll.Common.Bookings.Models;
 
 public class Booking
 {
-    public int Id { get; set; }
-    public int RoomId { get; set; }
+    public Guid Id { get; set; }
+    public Guid RoomId { get; set; }
     public string RoomName { get; set; } = string.Empty;
     public Guid UserId { get; set; }
     public DateTime StartTime { get; set; }

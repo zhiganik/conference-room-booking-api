@@ -1,5 +1,5 @@
 CREATE OR ALTER PROCEDURE [MZhehistovskyi].[sp_ServiceOptions_IsInUseByRoom]
-    @ServiceOptionId INT
+    @ServiceOptionId UNIQUEIDENTIFIER
 AS
 BEGIN
     SET NOCOUNT ON;

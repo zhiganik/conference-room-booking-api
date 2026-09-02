@@ -4,7 +4,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    DECLARE @RoomId INT = (
+    DECLARE @RoomId UNIQUEIDENTIFIER = (
         SELECT TOP (1) [Id] FROM [MZhehistovskyi].[Rooms]
         WHERE [Name] = @Name AND [IsDeleted] = 0
         ORDER BY [Id]

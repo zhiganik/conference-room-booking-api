@@ -1,5 +1,5 @@
 CREATE OR ALTER PROCEDURE [MZhehistovskyi].[sp_ServiceOptions_Update]
-    @Id    INT,
+    @Id    UNIQUEIDENTIFIER,
     @Name  NVARCHAR(100),
     @Price DECIMAL(18,2)
 AS

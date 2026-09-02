@@ -1,3 +1,3 @@
 ﻿namespace ConferenceRoomBooking.Web.Dtos.Booking;
 
-public record BookedServiceOptionResponse(int ServiceOptionId, string Name, decimal PriceAtBooking);
+public record BookedServiceOptionResponse(Guid ServiceOptionId, string Name, decimal PriceAtBooking);

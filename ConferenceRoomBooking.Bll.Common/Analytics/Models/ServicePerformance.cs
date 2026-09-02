@@ -1,4 +1,4 @@
 namespace ConferenceRoomBooking.Bll.Common.Analytics.Models;
 
-public record ServicePerformance(int Id, string Name, int TimesSelected, int DistinctRoomsUsedIn,
+public record ServicePerformance(Guid Id, string Name, int TimesSelected, int DistinctRoomsUsedIn,
     decimal TotalRevenue, int RevenueRank);

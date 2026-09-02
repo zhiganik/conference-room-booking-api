@@ -22,11 +22,11 @@ public interface IBookingManager
     /// <exception cref="NotFoundException">The room doesn't exist, or one of <paramref name="serviceOptionIds"/> doesn't exist.</exception>
     /// <exception cref="ConflictException">One or more of <paramref name="serviceOptionIds"/> isn't offered by this room.</exception>
     /// <exception cref="RoomUnavailableException">The room is already booked for some or all of the requested window.</exception>
-    Task<Booking> CreateAsync(int roomId, DateTime startTime, int durationMinutes, List<int>? serviceOptionIds, CancellationToken cancellationToken);
+    Task<Booking> CreateAsync(Guid roomId, DateTime startTime, int durationMinutes, List<Guid>? serviceOptionIds, CancellationToken cancellationToken);
 
     /// <summary>Retrieves a booking by id.</summary>
     /// <exception cref="NotFoundException">No booking exists with the given id.</exception>
-    Task<Booking> GetByIdAsync(int bookingId, CancellationToken cancellationToken);
+    Task<Booking> GetByIdAsync(Guid bookingId, CancellationToken cancellationToken);
 
     /// <summary>Retrieves every booking made by the current user.</summary>
     /// <exception cref="UnauthorizedException">The caller isn't authenticated.</exception>

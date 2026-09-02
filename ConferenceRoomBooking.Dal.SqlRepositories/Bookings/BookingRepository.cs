@@ -10,7 +10,7 @@ namespace ConferenceRoomBooking.Dal.SqlRepositories.Bookings;
 
 public class BookingRepository(IDbConnectionFactory connectionFactory, IMapper mapper) : IBookingRepository
 {
-    public async Task<int> CreateAsync(Booking booking, CancellationToken cancellationToken)
+    public async Task<Guid> CreateAsync(Booking booking, CancellationToken cancellationToken)
     {
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
@@ -31,10 +31,10 @@ public class BookingRepository(IDbConnectionFactory connectionFactory, IMapper m
         AddServiceOptionsParameter(command, booking.Services);
 
         var result = await command.ExecuteScalarAsync(cancellationToken);
-        return (int)result!;
+        return (Guid)result!;
     }
 
-    public async Task<Booking?> GetByIdAsync(int bookingId, CancellationToken cancellationToken)
+    public async Task<Booking?> GetByIdAsync(Guid bookingId, CancellationToken cancellationToken)
     {
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
@@ -70,7 +70,7 @@ public class BookingRepository(IDbConnectionFactory connectionFactory, IMapper m
         return entities.Select(mapper.Map<Booking>).ToList();
     }
 
-    public async Task<bool> ExistsOverlappingAsync(int roomId, DateTime startTime, DateTime endTime, CancellationToken cancellationToken)
+    public async Task<bool> ExistsOverlappingAsync(Guid roomId, DateTime startTime, DateTime endTime, CancellationToken cancellationToken)
     {
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
@@ -88,7 +88,7 @@ public class BookingRepository(IDbConnectionFactory connectionFactory, IMapper m
         return (bool)result!;
     }
 
-    public async Task<bool> HasActiveForRoomAsync(int roomId, DateTime nowUtc, CancellationToken cancellationToken)
+    public async Task<bool> HasActiveForRoomAsync(Guid roomId, DateTime nowUtc, CancellationToken cancellationToken)
     {
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
@@ -108,7 +108,7 @@ public class BookingRepository(IDbConnectionFactory connectionFactory, IMapper m
     private static void AddServiceOptionsParameter(SqlCommand command, IEnumerable<BookedServiceOption> services)
     {
         var table = new DataTable();
-        table.Columns.Add("ServiceOptionId", typeof(int));
+        table.Columns.Add("ServiceOptionId", typeof(Guid));
         table.Columns.Add("ServiceOptionName", typeof(string));
         table.Columns.Add("PriceAtBooking", typeof(decimal));
 
@@ -125,17 +125,17 @@ public class BookingRepository(IDbConnectionFactory connectionFactory, IMapper m
     private static async Task<List<BookingEntity>> ReadBookingsAsync(SqlDataReader reader, CancellationToken cancellationToken)
     {
         var bookings = new List<BookingEntity>();
-        var bookingsById = new Dictionary<int, BookingEntity>();
+        var bookingsById = new Dictionary<Guid, BookingEntity>();
 
         while (await reader.ReadAsync(cancellationToken))
         {
-            var bookingId = reader.GetInt32(reader.GetOrdinal("Id"));
+            var bookingId = reader.GetGuid(reader.GetOrdinal("Id"));
             if (!bookingsById.TryGetValue(bookingId, out var booking))
             {
                 booking = new BookingEntity
                 {
                     Id = bookingId,
-                    RoomId = reader.GetInt32(reader.GetOrdinal("RoomId")),
+                    RoomId = reader.GetGuid(reader.GetOrdinal("RoomId")),
                     RoomName = reader.GetString(reader.GetOrdinal("RoomName")),
                     UserId = reader.GetGuid(reader.GetOrdinal("UserId")),
                     StartTime = reader.GetDateTime(reader.GetOrdinal("StartTime")),
@@ -155,7 +155,7 @@ public class BookingRepository(IDbConnectionFactory connectionFactory, IMapper m
                 booking.ServiceOptions.Add(new BookingServiceOptionEntity
                 {
                     BookingId = bookingId,
-                    ServiceOptionId = reader.GetInt32(serviceOptionIdOrdinal),
+                    ServiceOptionId = reader.GetGuid(serviceOptionIdOrdinal),
                     ServiceOptionName = reader.GetString(reader.GetOrdinal("ServiceOptionName")),
                     PriceAtBooking = reader.GetDecimal(reader.GetOrdinal("PriceAtBooking"))
                 });

@@ -1,5 +1,5 @@
 CREATE OR ALTER PROCEDURE [MZhehistovskyi].[sp_Bookings_HasActiveForRoom]
-    @RoomId INT,
+    @RoomId UNIQUEIDENTIFIER,
     @NowUtc DATETIME2(3)
 AS
 BEGIN

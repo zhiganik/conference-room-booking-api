@@ -1,6 +1,6 @@
 CREATE OR ALTER PROCEDURE [MZhehistovskyi].[sp_ServiceOptions_ExistsByName]
     @Name        NVARCHAR(100),
-    @ExcludingId INT = NULL
+    @ExcludingId UNIQUEIDENTIFIER = NULL
 AS
 BEGIN
     SET NOCOUNT ON;

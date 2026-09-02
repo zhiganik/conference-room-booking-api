@@ -23,7 +23,7 @@ public class AnalyticsRepository(IDbConnectionFactory connectionFactory) : IAnal
         while (await reader.ReadAsync(cancellationToken))
         {
             results.Add(new RoomPerformance(
-                reader.GetInt32(reader.GetOrdinal("RoomId")),
+                reader.GetGuid(reader.GetOrdinal("RoomId")),
                 reader.GetString(reader.GetOrdinal("RoomName")),
                 reader.GetInt32(reader.GetOrdinal("TotalBookings")),
                 reader.GetDecimal(reader.GetOrdinal("TotalRevenue")),
@@ -49,7 +49,7 @@ public class AnalyticsRepository(IDbConnectionFactory connectionFactory) : IAnal
         while (await reader.ReadAsync(cancellationToken))
         {
             results.Add(new ServicePerformance(
-                reader.GetInt32(reader.GetOrdinal("Id")),
+                reader.GetGuid(reader.GetOrdinal("Id")),
                 reader.GetString(reader.GetOrdinal("Name")),
                 reader.GetInt32(reader.GetOrdinal("TimesSelected")),
                 reader.GetInt32(reader.GetOrdinal("DistinctRoomsUsedIn")),

@@ -12,5 +12,5 @@ public interface IRoomBookingLock
     /// </summary>
     /// <param name="roomId">The room to lock.</param>
     /// <returns>A token that releases the lock when disposed.</returns>
-    Task<IDisposable> AcquireAsync(int roomId, CancellationToken cancellationToken);
+    Task<IDisposable> AcquireAsync(Guid roomId, CancellationToken cancellationToken);
 }

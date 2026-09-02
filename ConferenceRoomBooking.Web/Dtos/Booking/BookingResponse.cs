@@ -1,8 +1,8 @@
 ﻿namespace ConferenceRoomBooking.Web.Dtos.Booking;
 
 public record BookingResponse(
-    int Id,
-    int RoomId,
+    Guid Id,
+    Guid RoomId,
     string RoomName,
     DateTime StartTime,
     DateTime EndTime,

@@ -9,7 +9,7 @@ namespace ConferenceRoomBooking.Bll.Rooms;
 
 public class RoomManager(IRoomRepository roomRepository, IServiceOptionRepository serviceOptionRepository, IBookingRepository bookingRepository) : IRoomManager
 {
-    public async Task<Room> CreateAsync(string name, int capacity, decimal baseHourRate, List<int>? serviceOptionIds, CancellationToken cancellationToken)
+    public async Task<Room> CreateAsync(string name, int capacity, decimal baseHourRate, List<Guid>? serviceOptionIds, CancellationToken cancellationToken)
     {
         var services = await ResolveServiceOptionsAsync(serviceOptionIds ?? [], cancellationToken);
 
@@ -24,11 +24,11 @@ public class RoomManager(IRoomRepository roomRepository, IServiceOptionRepositor
         return await roomRepository.CreateAsync(room, cancellationToken);
     }
 
-    public async Task<Room> GetByIdAsync(int roomId, CancellationToken cancellationToken) =>
+    public async Task<Room> GetByIdAsync(Guid roomId, CancellationToken cancellationToken) =>
         await roomRepository.GetByIdAsync(roomId, cancellationToken)
         ?? throw new NotFoundException(nameof(Room), roomId);
 
-    public async Task<Room> UpdateAsync(int roomId, string name, int capacity, decimal baseHourRate, List<int>? serviceOptionIds, CancellationToken cancellationToken)
+    public async Task<Room> UpdateAsync(Guid roomId, string name, int capacity, decimal baseHourRate, List<Guid>? serviceOptionIds, CancellationToken cancellationToken)
     {
         var room = await roomRepository.GetByIdAsync(roomId, cancellationToken)
             ?? throw new NotFoundException(nameof(Room), roomId);
@@ -46,7 +46,7 @@ public class RoomManager(IRoomRepository roomRepository, IServiceOptionRepositor
             ?? throw new NotFoundException(nameof(Room), roomId);
     }
 
-    public async Task DeleteAsync(int roomId, CancellationToken cancellationToken)
+    public async Task DeleteAsync(Guid roomId, CancellationToken cancellationToken)
     {
         var room = await roomRepository.GetByIdAsync(roomId, cancellationToken)
             ?? throw new NotFoundException(nameof(Room), roomId);
@@ -62,7 +62,7 @@ public class RoomManager(IRoomRepository roomRepository, IServiceOptionRepositor
     public async Task<IReadOnlyList<AvailableRoom>> SearchAvailableAsync(DateTime startDate, DateTime endDate, int capacity, CancellationToken cancellationToken) =>
         await roomRepository.SearchAvailableAsync(capacity, startDate, endDate, cancellationToken);
 
-    private async Task<IEnumerable<ServiceOption>> ResolveServiceOptionsAsync(IReadOnlyCollection<int> serviceOptionIds, CancellationToken cancellationToken)
+    private async Task<IEnumerable<ServiceOption>> ResolveServiceOptionsAsync(IReadOnlyCollection<Guid> serviceOptionIds, CancellationToken cancellationToken)
     {
         if (serviceOptionIds.Count == 0)
         {

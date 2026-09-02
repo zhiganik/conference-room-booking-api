@@ -11,7 +11,7 @@ public class CreateBookingRequestValidator : AbstractValidator<CreateBookingRequ
     public CreateBookingRequestValidator()
     {
         RuleFor(x => x.RoomId)
-            .GreaterThan(0).WithMessage("RoomId cant be negative.");
+            .NotEqual(Guid.Empty).WithMessage("RoomId is required.");
 
         RuleFor(x => x.StartTime)
             .NotEqual(default(DateTime)).WithMessage("StartTime is required.")
@@ -40,7 +40,7 @@ public class CreateBookingRequestValidator : AbstractValidator<CreateBookingRequ
         When(x => x.ServiceOptionIds is not null, () =>
         {
             RuleForEach(x => x.ServiceOptionIds)
-                .GreaterThan(0).WithMessage("ServiceOptionIds must contain valid catalog IDs.");
+                .NotEqual(Guid.Empty).WithMessage("ServiceOptionIds must contain valid catalog IDs.");
 
             RuleFor(x => x.ServiceOptionIds)
                 .Must(ids => ids!.Distinct().Count() == ids.Count)

@@ -18,7 +18,7 @@ public interface IRoomRepository
 
     /// <summary>Looks up a non-deleted room by id, including its offered services.</summary>
     /// <returns>The matching room, or <see langword="null"/> if no such active room exists.</returns>
-    Task<Room?> GetByIdAsync(int roomId, CancellationToken cancellationToken);
+    Task<Room?> GetByIdAsync(Guid roomId, CancellationToken cancellationToken);
 
     /// <summary>Looks up a non-deleted room by name, including its offered services.</summary>
     /// <returns>The matching room, or <see langword="null"/> if no active room has that name.</returns>
@@ -31,7 +31,7 @@ public interface IRoomRepository
     Task UpdateAsync(Room room, CancellationToken cancellationToken);
 
     /// <summary>Flags a room as deleted (<c>IsDeleted = 1</c>) without removing its row or booking history.</summary>
-    Task SoftDeleteAsync(int roomId, CancellationToken cancellationToken);
+    Task SoftDeleteAsync(Guid roomId, CancellationToken cancellationToken);
 
     /// <summary>
     /// Finds non-deleted rooms with at least the given capacity and no booking overlapping the

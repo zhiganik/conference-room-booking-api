@@ -19,11 +19,11 @@ public class ServiceOptionManager(IServiceOptionRepository serviceOptionReposito
         return await serviceOptionRepository.CreateAsync(serviceOption, cancellationToken);
     }
 
-    public async Task<ServiceOption> GetByIdAsync(int serviceOptionId, CancellationToken cancellationToken) =>
+    public async Task<ServiceOption> GetByIdAsync(Guid serviceOptionId, CancellationToken cancellationToken) =>
         await serviceOptionRepository.GetByIdAsync(serviceOptionId, cancellationToken)
         ?? throw new NotFoundException(nameof(ServiceOption), serviceOptionId);
 
-    public async Task<ServiceOption> UpdateAsync(int serviceOptionId, string name, decimal price, CancellationToken cancellationToken)
+    public async Task<ServiceOption> UpdateAsync(Guid serviceOptionId, string name, decimal price, CancellationToken cancellationToken)
     {
         var serviceOption = await serviceOptionRepository.GetByIdAsync(serviceOptionId, cancellationToken)
             ?? throw new NotFoundException(nameof(ServiceOption), serviceOptionId);
@@ -38,7 +38,7 @@ public class ServiceOptionManager(IServiceOptionRepository serviceOptionReposito
         return serviceOption;
     }
 
-    public async Task DeleteAsync(int serviceOptionId, CancellationToken cancellationToken)
+    public async Task DeleteAsync(Guid serviceOptionId, CancellationToken cancellationToken)
     {
         var serviceOption = await serviceOptionRepository.GetByIdAsync(serviceOptionId, cancellationToken)
             ?? throw new NotFoundException(nameof(ServiceOption), serviceOptionId);
@@ -55,7 +55,7 @@ public class ServiceOptionManager(IServiceOptionRepository serviceOptionReposito
     public async Task<IReadOnlyList<ServiceOption>> SearchAsync(string? name, CancellationToken cancellationToken) =>
         await serviceOptionRepository.SearchAsync(name, cancellationToken);
 
-    private async Task EnsureNameIsUniqueAsync(string name, int? excludingId, CancellationToken cancellationToken)
+    private async Task EnsureNameIsUniqueAsync(string name, Guid? excludingId, CancellationToken cancellationToken)
     {
         if (await serviceOptionRepository.ExistsByNameAsync(name, excludingId, cancellationToken))
         {

@@ -30,10 +30,10 @@ public class ServiceOptionsController(IServiceOptionManager serviceOptionManager
     /// <param name="serviceOptionId">The service option's id.</param>
     /// <response code="200">Service found.</response>
     /// <response code="404">No service exists with the given ID.</response>
-    [HttpGet("{serviceOptionId:int}")]
+    [HttpGet("{serviceOptionId:guid}")]
     [ProducesResponseType(typeof(ServiceOptionResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<ServiceOptionResponse>> GetById([FromRoute] int serviceOptionId,
+    public async Task<ActionResult<ServiceOptionResponse>> GetById([FromRoute] Guid serviceOptionId,
         CancellationToken cancellationToken)
     {
         var serviceOption = await serviceOptionManager.GetByIdAsync(serviceOptionId, cancellationToken);
@@ -45,10 +45,10 @@ public class ServiceOptionsController(IServiceOptionManager serviceOptionManager
     /// <param name="request">The service option's new name and price.</param>
     /// <response code="200">Service updated successfully.</response>
     /// <response code="404">No service exists with the given ID.</response>
-    [HttpPut("{serviceOptionId:int}")]
+    [HttpPut("{serviceOptionId:guid}")]
     [ProducesResponseType(typeof(ServiceOptionResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<ServiceOptionResponse>> Update([FromRoute] int serviceOptionId,
+    public async Task<ActionResult<ServiceOptionResponse>> Update([FromRoute] Guid serviceOptionId,
         [FromBody] UpdateServiceOptionRequest request,
         CancellationToken cancellationToken)
     {
@@ -61,11 +61,11 @@ public class ServiceOptionsController(IServiceOptionManager serviceOptionManager
     /// <response code="204">Service deleted successfully.</response>
     /// <response code="404">No service exists with the given ID.</response>
     /// <response code="409">Service is currently linked to one or more rooms.</response>
-    [HttpDelete("{serviceOptionId:int}")]
+    [HttpDelete("{serviceOptionId:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> Delete([FromRoute] int serviceOptionId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Delete([FromRoute] Guid serviceOptionId, CancellationToken cancellationToken)
     {
         await serviceOptionManager.DeleteAsync(serviceOptionId, cancellationToken);
         return NoContent();

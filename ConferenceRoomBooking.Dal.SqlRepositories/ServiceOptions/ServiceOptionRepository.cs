@@ -29,7 +29,7 @@ public class ServiceOptionRepository(IDbConnectionFactory connectionFactory, IMa
         return mapper.Map<ServiceOption>(MapEntity(reader));
     }
 
-    public async Task<ServiceOption?> GetByIdAsync(int serviceOptionId, CancellationToken cancellationToken)
+    public async Task<ServiceOption?> GetByIdAsync(Guid serviceOptionId, CancellationToken cancellationToken)
     {
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
@@ -73,7 +73,7 @@ public class ServiceOptionRepository(IDbConnectionFactory connectionFactory, IMa
         return mapper.Map<ServiceOption>(MapEntity(reader));
     }
 
-    public async Task<IReadOnlyList<ServiceOption>> GetByIdsAsync(IReadOnlyCollection<int> serviceOptionIds, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<ServiceOption>> GetByIdsAsync(IReadOnlyCollection<Guid> serviceOptionIds, CancellationToken cancellationToken)
     {
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
@@ -83,9 +83,9 @@ public class ServiceOptionRepository(IDbConnectionFactory connectionFactory, IMa
             CommandType = CommandType.StoredProcedure
         };
 
-        var idsParameter = command.Parameters.AddWithValue("@Ids", BuildIntIdListTable(serviceOptionIds));
+        var idsParameter = command.Parameters.AddWithValue("@Ids", BuildGuidIdListTable(serviceOptionIds));
         idsParameter.SqlDbType = SqlDbType.Structured;
-        idsParameter.TypeName = "MZhehistovskyi.IntIdList";
+        idsParameter.TypeName = "MZhehistovskyi.GuidIdList";
 
         var results = new List<ServiceOption>();
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
@@ -114,7 +114,7 @@ public class ServiceOptionRepository(IDbConnectionFactory connectionFactory, IMa
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
-    public async Task DeleteAsync(int serviceOptionId, CancellationToken cancellationToken)
+    public async Task DeleteAsync(Guid serviceOptionId, CancellationToken cancellationToken)
     {
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
@@ -151,7 +151,7 @@ public class ServiceOptionRepository(IDbConnectionFactory connectionFactory, IMa
         return results;
     }
 
-    public async Task<bool> IsInUseByRoomAsync(int serviceOptionId, CancellationToken cancellationToken)
+    public async Task<bool> IsInUseByRoomAsync(Guid serviceOptionId, CancellationToken cancellationToken)
     {
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
@@ -167,7 +167,7 @@ public class ServiceOptionRepository(IDbConnectionFactory connectionFactory, IMa
         return (bool)result!;
     }
 
-    public async Task<bool> ExistsByNameAsync(string name, int? excludingId, CancellationToken cancellationToken)
+    public async Task<bool> ExistsByNameAsync(string name, Guid? excludingId, CancellationToken cancellationToken)
     {
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
@@ -184,10 +184,10 @@ public class ServiceOptionRepository(IDbConnectionFactory connectionFactory, IMa
         return (bool)result!;
     }
 
-    private static DataTable BuildIntIdListTable(IReadOnlyCollection<int> ids)
+    private static DataTable BuildGuidIdListTable(IReadOnlyCollection<Guid> ids)
     {
         var table = new DataTable();
-        table.Columns.Add("Id", typeof(int));
+        table.Columns.Add("Id", typeof(Guid));
 
         foreach (var id in ids)
         {
@@ -199,7 +199,7 @@ public class ServiceOptionRepository(IDbConnectionFactory connectionFactory, IMa
 
     private static ServiceOptionEntity MapEntity(SqlDataReader reader) => new()
     {
-        Id = reader.GetInt32(reader.GetOrdinal("Id")),
+        Id = reader.GetGuid(reader.GetOrdinal("Id")),
         Name = reader.GetString(reader.GetOrdinal("Name")),
         Price = reader.GetDecimal(reader.GetOrdinal("Price"))
     };

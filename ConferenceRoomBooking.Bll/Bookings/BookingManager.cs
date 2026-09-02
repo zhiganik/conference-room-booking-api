@@ -18,7 +18,7 @@ public class BookingManager(
     IUserContext userContext,
     IRoomBookingLock roomBookingLock) : IBookingManager
 {
-    public async Task<Booking> CreateAsync(int roomId, DateTime startTime, int durationMinutes, List<int>? serviceOptionIds, CancellationToken cancellationToken)
+    public async Task<Booking> CreateAsync(Guid roomId, DateTime startTime, int durationMinutes, List<Guid>? serviceOptionIds, CancellationToken cancellationToken)
     {
         var currentUserId = GetCurrentUserId();
 
@@ -40,7 +40,7 @@ public class BookingManager(
         var priceBreakdown = priceCalculator.Calculate(room.BaseHourRate, startTime, endTime,
             selectedServices.Select(s => s.Price));
 
-        int bookingId;
+        Guid bookingId;
         using (await roomBookingLock.AcquireAsync(roomId, cancellationToken))
         {
             if (await bookingRepository.ExistsOverlappingAsync(roomId, startTime, endTime, cancellationToken))
@@ -71,7 +71,7 @@ public class BookingManager(
             ?? throw new NotFoundException(nameof(Booking), bookingId);
     }
 
-    public async Task<Booking> GetByIdAsync(int bookingId, CancellationToken cancellationToken) =>
+    public async Task<Booking> GetByIdAsync(Guid bookingId, CancellationToken cancellationToken) =>
         await bookingRepository.GetByIdAsync(bookingId, cancellationToken)
         ?? throw new NotFoundException(nameof(Booking), bookingId);
 
@@ -83,7 +83,7 @@ public class BookingManager(
             ? userId
             : throw new UnauthorizedException("User is not authenticated.");
 
-    private async Task<IEnumerable<ServiceOption>> ResolveServiceOptionsAsync(IReadOnlyCollection<int> serviceOptionIds, CancellationToken cancellationToken)
+    private async Task<IEnumerable<ServiceOption>> ResolveServiceOptionsAsync(IReadOnlyCollection<Guid> serviceOptionIds, CancellationToken cancellationToken)
     {
         if (serviceOptionIds.Count == 0)
         {
