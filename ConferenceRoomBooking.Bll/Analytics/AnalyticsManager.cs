@@ -6,8 +6,8 @@ namespace ConferenceRoomBooking.Bll.Analytics;
 public class AnalyticsManager(IAnalyticsRepository analyticsRepository) : IAnalyticsManager
 {
     public Task<IReadOnlyList<RoomPerformance>> GetRoomPerformanceAsync(CancellationToken cancellationToken) =>
-        throw new NotImplementedException();
+        analyticsRepository.GetRoomPerformanceAsync(cancellationToken);
 
     public Task<IReadOnlyList<ServicePerformance>> GetServicePerformanceAsync(CancellationToken cancellationToken) =>
-        throw new NotImplementedException();
+        analyticsRepository.GetServicePerformanceAsync(cancellationToken);
 }

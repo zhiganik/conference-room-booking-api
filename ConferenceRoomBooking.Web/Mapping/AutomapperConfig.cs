@@ -1,8 +1,10 @@
 using AutoMapper;
+using ConferenceRoomBooking.Bll.Common.Analytics.Models;
 using ConferenceRoomBooking.Bll.Common.Auth.Models;
 using ConferenceRoomBooking.Bll.Common.Bookings.Models;
 using ConferenceRoomBooking.Bll.Common.Rooms.Models;
 using ConferenceRoomBooking.Bll.Common.ServiceOptions.Models;
+using ConferenceRoomBooking.Web.Dtos.Analytics;
 using ConferenceRoomBooking.Web.Dtos.Auth;
 using ConferenceRoomBooking.Web.Dtos.Booking;
 using ConferenceRoomBooking.Web.Dtos.Rooms;
@@ -33,5 +35,8 @@ public class AutomapperConfig : Profile
                 src.TotalPrice - src.ServicesCost,
                 src.ServicesCost,
                 src.TotalPrice)));
+
+        CreateMap<RoomPerformance, RoomPerformanceResponse>();
+        CreateMap<ServicePerformance, ServicePerformanceResponse>();
     }
 }
