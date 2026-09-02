@@ -285,16 +285,19 @@ On every startup the API seeds:
   the one pre-seeded way to reach `Admin`-only endpoints). Both are
   idempotent — skipped if the email already exists.
 - **Rooms**: Room A (50 people, 2000₴/hour), Room B (100 people,
-  3500₴/hour), Room C (30 people, 1500₴/hour).
+  3500₴/hour), Room C (30 people, 1500₴/hour). Idempotent — skipped if a
+  room with that name already exists.
 - **Services**: Projector (500₴), Wi-Fi (300₴), Sound (700₴). Idempotent
   — skipped if a service with that name already exists.
 - **~9 sample bookings** spread across the rooms and services over the
   past month, with prices already computed by the same pricing engine
   used at runtime — useful for trying the analytics endpoints immediately.
+  Idempotent *within the same calendar day* (skipped if an overlapping
+  booking already exists for that room/time) — but each booking's start
+  time is computed relative to "today" so the demo data always looks
+  recent, so restarting on a **later day** computes different timestamps
+  and adds a fresh batch alongside the previous one rather than matching it.
 
-> ⚠️ **Rooms and sample bookings are not yet idempotent** — unlike users
-> and services, nothing currently guards against re-inserting them, so
-> restarting the app against a database that already has this seed data
-> will create duplicates. Safe to rely on against a freshly-migrated,
-> empty database; not safe to restart repeatedly against one that's
-> already been seeded.
+Safe to restart repeatedly on any given day; restarting on a new day adds
+another round of sample bookings (rooms, services, and users won't
+duplicate).

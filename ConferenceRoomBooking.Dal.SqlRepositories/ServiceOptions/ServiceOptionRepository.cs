@@ -51,6 +51,28 @@ public class ServiceOptionRepository(IDbConnectionFactory connectionFactory, IMa
         return mapper.Map<ServiceOption>(MapEntity(reader));
     }
 
+    public async Task<ServiceOption?> GetByNameAsync(string name, CancellationToken cancellationToken)
+    {
+        await using var connection = (SqlConnection)connectionFactory.CreateConnection();
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command = new SqlCommand("MZhehistovskyi.sp_ServiceOptions_GetByName", connection)
+        {
+            CommandType = CommandType.StoredProcedure
+        };
+
+        command.Parameters.AddWithValue("@Name", name);
+
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+
+        if (!await reader.ReadAsync(cancellationToken))
+        {
+            return null;
+        }
+
+        return mapper.Map<ServiceOption>(MapEntity(reader));
+    }
+
     public async Task<IReadOnlyList<ServiceOption>> GetByIdsAsync(IReadOnlyCollection<int> serviceOptionIds, CancellationToken cancellationToken)
     {
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();

@@ -50,6 +50,24 @@ public class RoomRepository(IDbConnectionFactory connectionFactory, IMapper mapp
         return entities.Count == 0 ? null : mapper.Map<Room>(entities[0]);
     }
 
+    public async Task<Room?> GetByNameAsync(string name, CancellationToken cancellationToken)
+    {
+        await using var connection = (SqlConnection)connectionFactory.CreateConnection();
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command = new SqlCommand("MZhehistovskyi.sp_Rooms_GetByName", connection)
+        {
+            CommandType = CommandType.StoredProcedure
+        };
+
+        command.Parameters.AddWithValue("@Name", name);
+
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        var entities = await ReadRoomsAsync(reader, cancellationToken);
+
+        return entities.Count == 0 ? null : mapper.Map<Room>(entities[0]);
+    }
+
     public async Task UpdateAsync(Room room, CancellationToken cancellationToken)
     {
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();

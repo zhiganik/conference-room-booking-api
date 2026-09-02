@@ -15,8 +15,12 @@ namespace ConferenceRoomBooking.Web.Startup;
 // Seeds directly through the repositories (not the managers) — same as the old EF version, which
 // wrote straight to AppDbContext/UserManager rather than going through the orchestrators (and, for
 // bookings, needs a UserId that isn't tied to an HTTP request the way IBookingManager's is).
-// Room/booking idempotency (skip-if-already-seeded) needs a lookup the repositories don't expose
-// yet, so this is only safe to run once against an empty database until that lands feature-by-feature.
+// Users, rooms, and service options are fully idempotent (skip-if-already-present by email/name).
+// Sample bookings are idempotent within the same calendar day (skip-if-already-overlapping) but not
+// across day boundaries — their start times are computed relative to DateTime.UtcNow.Date so the
+// demo data always looks recent, which means a run on a later day computes different timestamps and
+// won't match yesterday's rows. Safe for repeated restarts during a single day; running it again on
+// a fresh day adds another batch alongside the previous one.
 public static class DataSeeder
 {
     private const string SeedUserEmail = "seed.bookings@conference-room-booking.local";
@@ -99,10 +103,18 @@ public static class DataSeeder
 
     private static async Task<Dictionary<string, Room>> SeedRoomsAsync(IRoomRepository roomRepository, ILogger logger)
     {
-        var created = new Dictionary<string, Room>();
+        var rooms = new Dictionary<string, Room>();
+        var createdCount = 0;
 
         foreach (var definition in RoomDefinitions)
         {
+            var existing = await roomRepository.GetByNameAsync(definition.Name, CancellationToken.None);
+            if (existing is not null)
+            {
+                rooms[definition.Name] = existing;
+                continue;
+            }
+
             var room = await roomRepository.CreateAsync(new Room
             {
                 Name = definition.Name,
@@ -110,22 +122,27 @@ public static class DataSeeder
                 BaseHourRate = definition.BaseHourlyRate
             }, CancellationToken.None);
 
-            created[definition.Name] = room;
+            rooms[definition.Name] = room;
+            createdCount++;
         }
 
-        logger.LogInformation("Seeded {Count} room(s): {Names}", created.Count, string.Join(", ", created.Keys));
-        return created;
+        logger.LogInformation("Seeded {Count} new room(s) ({Total} total): {Names}",
+            createdCount, rooms.Count, string.Join(", ", rooms.Keys));
+        return rooms;
     }
 
     private static async Task<Dictionary<string, ServiceOption>> SeedServiceOptionsAsync(
         IServiceOptionRepository serviceOptionRepository, ILogger logger)
     {
-        var created = new Dictionary<string, ServiceOption>();
+        var serviceOptions = new Dictionary<string, ServiceOption>();
+        var createdCount = 0;
 
         foreach (var definition in ServiceOptionDefinitions)
         {
-            if (await serviceOptionRepository.ExistsByNameAsync(definition.Name, null, CancellationToken.None))
+            var existing = await serviceOptionRepository.GetByNameAsync(definition.Name, CancellationToken.None);
+            if (existing is not null)
             {
+                serviceOptions[definition.Name] = existing;
                 continue;
             }
 
@@ -135,11 +152,13 @@ public static class DataSeeder
                 Price = definition.Price
             }, CancellationToken.None);
 
-            created[definition.Name] = serviceOption;
+            serviceOptions[definition.Name] = serviceOption;
+            createdCount++;
         }
 
-        logger.LogInformation("Seeded {Count} service(s): {Names}", created.Count, string.Join(", ", created.Keys));
-        return created;
+        logger.LogInformation("Seeded {Count} new service(s) ({Total} total): {Names}",
+            createdCount, serviceOptions.Count, string.Join(", ", serviceOptions.Keys));
+        return serviceOptions;
     }
 
     private static async Task SeedBookingsAsync(IBookingRepository bookingRepository, IRentalPriceCalculator priceCalculator,
@@ -155,13 +174,18 @@ public static class DataSeeder
                 continue;
             }
 
+            var startTime = DateTime.UtcNow.Date.AddDays(-definition.DaysAgo).Add(definition.Start);
+            var endTime = startTime.AddMinutes(definition.DurationMinutes);
+
+            if (await bookingRepository.ExistsOverlappingAsync(room.Id, startTime, endTime, CancellationToken.None))
+            {
+                continue;
+            }
+
             var selectedServices = definition.ServiceNames
                 .Where(serviceOptions.ContainsKey)
                 .Select(name => serviceOptions[name])
                 .ToList();
-
-            var startTime = DateTime.UtcNow.Date.AddDays(-definition.DaysAgo).Add(definition.Start);
-            var endTime = startTime.AddMinutes(definition.DurationMinutes);
 
             var priceBreakdown = priceCalculator.Calculate(
                 room.BaseHourRate, startTime, endTime, selectedServices.Select(s => s.Price));
@@ -186,6 +210,6 @@ public static class DataSeeder
             count++;
         }
 
-        logger.LogInformation("Seeded {Count} booking(s).", count);
+        logger.LogInformation("Seeded {Count} new booking(s).", count);
     }
 }
