@@ -15,7 +15,7 @@ public class BookingRepository(IDbConnectionFactory connectionFactory, IMapper m
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand("MZhehistovskyi.sp_Bookings_Create", connection)
+        await using var command = new SqlCommand($"{DbSchema.Name}.sp_Bookings_Create", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
@@ -39,7 +39,7 @@ public class BookingRepository(IDbConnectionFactory connectionFactory, IMapper m
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand("MZhehistovskyi.sp_Bookings_GetById", connection)
+        await using var command = new SqlCommand($"{DbSchema.Name}.sp_Bookings_GetById", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
@@ -57,7 +57,7 @@ public class BookingRepository(IDbConnectionFactory connectionFactory, IMapper m
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand("MZhehistovskyi.sp_Bookings_GetByUserId", connection)
+        await using var command = new SqlCommand($"{DbSchema.Name}.sp_Bookings_GetByUserId", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
@@ -75,7 +75,7 @@ public class BookingRepository(IDbConnectionFactory connectionFactory, IMapper m
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand("MZhehistovskyi.sp_Bookings_ExistsOverlapping", connection)
+        await using var command = new SqlCommand($"{DbSchema.Name}.sp_Bookings_ExistsOverlapping", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
@@ -93,7 +93,7 @@ public class BookingRepository(IDbConnectionFactory connectionFactory, IMapper m
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand("MZhehistovskyi.sp_Bookings_HasActiveForRoom", connection)
+        await using var command = new SqlCommand($"{DbSchema.Name}.sp_Bookings_HasActiveForRoom", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
@@ -119,7 +119,7 @@ public class BookingRepository(IDbConnectionFactory connectionFactory, IMapper m
 
         var parameter = command.Parameters.AddWithValue("@ServiceOptions", table);
         parameter.SqlDbType = SqlDbType.Structured;
-        parameter.TypeName = "MZhehistovskyi.BookingServiceOptionList";
+        parameter.TypeName = $"{DbSchema.Name}.BookingServiceOptionList";
     }
 
     private static async Task<List<BookingEntity>> ReadBookingsAsync(SqlDataReader reader, CancellationToken cancellationToken)

@@ -13,7 +13,7 @@ public class AnalyticsRepository(IDbConnectionFactory connectionFactory) : IAnal
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand("MZhehistovskyi.sp_Analytics_GetRoomPerformance", connection)
+        await using var command = new SqlCommand($"{DbSchema.Name}.sp_Analytics_GetRoomPerformance", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
@@ -39,7 +39,7 @@ public class AnalyticsRepository(IDbConnectionFactory connectionFactory) : IAnal
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand("MZhehistovskyi.sp_Analytics_GetServicePerformance", connection)
+        await using var command = new SqlCommand($"{DbSchema.Name}.sp_Analytics_GetServicePerformance", connection)
         {
             CommandType = CommandType.StoredProcedure
         };

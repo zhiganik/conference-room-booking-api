@@ -1,4 +1,5 @@
 using Azure.Identity;
+using ConferenceRoomBooking.Dal.SqlRepositories.Shared;
 using DbUp;
 using DbUp.Engine;
 using DbUp.Support;
@@ -18,7 +19,7 @@ public static class DatabaseMigrator
         var connectionManager = new AzureSqlConnectionManager(connectionString, new DefaultAzureCredential());
 
         var upgrader = DeployChanges.To
-            .SqlDatabase(connectionManager, "MZhehistovskyi")
+            .SqlDatabase(connectionManager, DbSchema.Name)
             .WithScriptsEmbeddedInAssembly(assembly, IsMigrationScript, new SqlScriptOptions { ScriptType = ScriptType.RunOnce })
             .WithScriptsEmbeddedInAssembly(assembly, IsProcedureScript, new SqlScriptOptions { ScriptType = ScriptType.RunAlways })
             .LogToConsole()
