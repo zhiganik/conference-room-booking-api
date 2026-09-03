@@ -1,23 +1,9 @@
 using System.Text;
-using ConferenceRoomBooking.Bll.Analytics;
-using ConferenceRoomBooking.Bll.Auth;
-using ConferenceRoomBooking.Bll.Bookings;
-using ConferenceRoomBooking.Bll.Common.Analytics;
-using ConferenceRoomBooking.Bll.Common.Auth;
-using ConferenceRoomBooking.Bll.Common.Bookings;
-using ConferenceRoomBooking.Bll.Common.Rooms;
-using ConferenceRoomBooking.Bll.Common.ServiceOptions;
+using ConferenceRoomBooking.Bll;
 using ConferenceRoomBooking.Bll.Common.Shared.Abstractions;
 using ConferenceRoomBooking.Bll.Common.Shared.Security;
 using ConferenceRoomBooking.Bll.Common.Shared.Settings;
-using ConferenceRoomBooking.Bll.Rooms;
-using ConferenceRoomBooking.Bll.ServiceOptions;
-using ConferenceRoomBooking.Dal.SqlRepositories.Analytics;
-using ConferenceRoomBooking.Dal.SqlRepositories.Auth;
-using ConferenceRoomBooking.Dal.SqlRepositories.Bookings;
-using ConferenceRoomBooking.Dal.SqlRepositories.Rooms;
-using ConferenceRoomBooking.Dal.SqlRepositories.ServiceOptions;
-using ConferenceRoomBooking.Dal.SqlRepositories.Shared;
+using ConferenceRoomBooking.Dal.SqlRepositories;
 using ConferenceRoomBooking.Web.Middleware;
 using ConferenceRoomBooking.Web.Services;
 using ConferenceRoomBooking.Web.Swagger;
@@ -38,7 +24,6 @@ public static class DependencyConfig
 
         return services
             .AddExceptionHandler()
-            .AddSqlConnectionFactory()
             .AddAutoMapperProfiles()
             .AddValidation()
             .AddHttpContextAccessor()
@@ -46,10 +31,9 @@ public static class DependencyConfig
             .AddAppAuthorization()
             .AddAuthorization()
             .AddSwaggerDocs()
-            .AddBusinessLogic()
-            .AddServices()
-            .AddRepositories()
-            .AddManagers();
+            .AddWebServices()
+            .AddDalSqlRepositories()
+            .AddBusinessLogic();
     }
 
     private static IServiceCollection AddExceptionHandler(this IServiceCollection services)
@@ -57,12 +41,6 @@ public static class DependencyConfig
         return services
             .AddExceptionHandler<GlobalExceptionHandler>()
             .AddProblemDetails();
-    }
-
-    private static IServiceCollection AddSqlConnectionFactory(this IServiceCollection services)
-    {
-        services.AddScoped<IDbConnectionFactory, SqlConnectionFactory>();
-        return services;
     }
 
     private static IServiceCollection AddAutoMapperProfiles(this IServiceCollection services)
@@ -80,38 +58,9 @@ public static class DependencyConfig
         return services;
     }
 
-    private static IServiceCollection AddServices(this IServiceCollection services)
+    private static IServiceCollection AddWebServices(this IServiceCollection services)
     {
         services.AddScoped<IUserContext, UserContext>();
-        services.AddSingleton<IRoomBookingLock, RoomBookingLock>();
-        return services;
-    }
-
-    private static IServiceCollection AddRepositories(this IServiceCollection services)
-    {
-        services.AddScoped<IRoomRepository, RoomRepository>();
-        services.AddScoped<IServiceOptionRepository, ServiceOptionRepository>();
-        services.AddScoped<IBookingRepository, BookingRepository>();
-        services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
-        return services;
-    }
-
-    private static IServiceCollection AddManagers(this IServiceCollection services)
-    {
-        services.AddScoped<IRoomManager, RoomManager>();
-        services.AddScoped<IServiceOptionManager, ServiceOptionManager>();
-        services.AddScoped<IBookingManager, BookingManager>();
-        services.AddScoped<IAuthManager, AuthManager>();
-        services.AddScoped<IAnalyticsManager, AnalyticsManager>();
-        return services;
-    }
-
-    private static IServiceCollection AddBusinessLogic(this IServiceCollection services)
-    {
-        services.AddSingleton<IRentalPriceCalculator, RentalPriceCalculator>();
-        services.AddTransient<IJwtIssuer, JwtIssuer>();
-        services.AddTransient<IPasswordHasher, PasswordHasher>();
         return services;
     }
 
