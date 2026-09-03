@@ -10,7 +10,7 @@ namespace ConferenceRoomBooking.Web.Controllers;
 /// <summary>CRUD for the service option catalog offered by rooms (Projector, Wi-Fi, Sound, etc.).</summary>
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Policy = AuthorizationPolicies.RequireAdmin)]
+[Authorize(Policy = AuthorizationPolicies.RequireUser)]
 public class ServiceOptionsController(IServiceOptionManager serviceOptionManager, IMapper mapper) : ControllerBase
 {
     /// <summary>Creates a new service option.</summary>
@@ -18,6 +18,7 @@ public class ServiceOptionsController(IServiceOptionManager serviceOptionManager
     /// <response code="201">Service created successfully.</response>
     [HttpPost]
     [ProducesResponseType(typeof(ServiceOptionResponse), StatusCodes.Status201Created)]
+    [Authorize(Policy = AuthorizationPolicies.RequireAdmin)]
     public async Task<ActionResult<ServiceOptionResponse>> Create([FromBody] CreateServiceOptionRequest request,
         CancellationToken cancellationToken)
     {
@@ -48,6 +49,7 @@ public class ServiceOptionsController(IServiceOptionManager serviceOptionManager
     [HttpPut("{serviceOptionId:guid}")]
     [ProducesResponseType(typeof(ServiceOptionResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [Authorize(Policy = AuthorizationPolicies.RequireAdmin)]
     public async Task<ActionResult<ServiceOptionResponse>> Update([FromRoute] Guid serviceOptionId,
         [FromBody] UpdateServiceOptionRequest request,
         CancellationToken cancellationToken)
@@ -65,6 +67,7 @@ public class ServiceOptionsController(IServiceOptionManager serviceOptionManager
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [Authorize(Policy = AuthorizationPolicies.RequireAdmin)]
     public async Task<IActionResult> Delete([FromRoute] Guid serviceOptionId, CancellationToken cancellationToken)
     {
         await serviceOptionManager.DeleteAsync(serviceOptionId, cancellationToken);

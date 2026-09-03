@@ -10,7 +10,7 @@ namespace ConferenceRoomBooking.Web.Controllers;
 /// <summary>Conference room CRUD and availability search.</summary>
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Policy = AuthorizationPolicies.RequireAdmin)]
+[Authorize(Policy = AuthorizationPolicies.RequireUser)]
 public class RoomsController(IRoomManager roomManager, IMapper mapper) : ControllerBase
 {
     /// <summary>Creates a new conference room with its base rate and offered services.</summary>
@@ -18,6 +18,7 @@ public class RoomsController(IRoomManager roomManager, IMapper mapper) : Control
     /// <response code="201">Room created successfully.</response>
     [HttpPost]
     [ProducesResponseType(typeof(RoomResponse), StatusCodes.Status201Created)]
+    [Authorize(Policy = AuthorizationPolicies.RequireAdmin)]
     public async Task<ActionResult<RoomResponse>> CreateRoom([FromBody] CreateRoomRequest request,
         CancellationToken cancellationToken)
     {
@@ -49,6 +50,7 @@ public class RoomsController(IRoomManager roomManager, IMapper mapper) : Control
     [HttpPut("{roomId:guid}")]
     [ProducesResponseType(typeof(RoomResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [Authorize(Policy = AuthorizationPolicies.RequireAdmin)]
     public async Task<ActionResult<RoomResponse>> UpdateRoom([FromRoute] Guid roomId, [FromBody] UpdateRoomRequest request,
         CancellationToken cancellationToken)
     {
@@ -64,6 +66,7 @@ public class RoomsController(IRoomManager roomManager, IMapper mapper) : Control
     [HttpDelete("{roomId:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [Authorize(Policy = AuthorizationPolicies.RequireAdmin)]
     public async Task<IActionResult> DeleteRoom([FromRoute] Guid roomId, CancellationToken cancellationToken)
     {
         await roomManager.DeleteAsync(roomId, cancellationToken);
@@ -75,7 +78,6 @@ public class RoomsController(IRoomManager roomManager, IMapper mapper) : Control
     /// <response code="200">Search completed (possibly with zero results).</response>
     [HttpGet("available")]
     [ProducesResponseType(typeof(IReadOnlyList<AvailableRoomResponse>), StatusCodes.Status200OK)]
-    [Authorize(Policy = AuthorizationPolicies.RequireUser)]
     public async Task<ActionResult<IReadOnlyList<AvailableRoomResponse>>> SearchAvailableRooms(
         [FromQuery] SearchAvailableRoomsRequest request, CancellationToken cancellationToken)
     {
