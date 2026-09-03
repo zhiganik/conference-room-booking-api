@@ -10,6 +10,11 @@ public class RoomBookingLock : IRoomBookingLock
     {
         var semaphore = _locksByRoomId.GetOrAdd(roomId, static _ => new SemaphoreSlim(1, 1));
         await semaphore.WaitAsync(cancellationToken);
-        return semaphore;
+        return new Releaser(semaphore);
+    }
+
+    private sealed record Releaser(SemaphoreSlim Semaphore) : IDisposable
+    {
+        public void Dispose() => Semaphore.Release();
     }
 }
