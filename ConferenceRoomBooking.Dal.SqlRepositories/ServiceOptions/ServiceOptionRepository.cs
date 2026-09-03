@@ -89,9 +89,14 @@ public class ServiceOptionRepository(IDbConnectionFactory connectionFactory, IMa
 
         var results = new List<ServiceOption>();
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+
+        var idOrd = reader.GetOrdinal("Id");
+        var nameOrd = reader.GetOrdinal("Name");
+        var priceOrd = reader.GetOrdinal("Price");
+
         while (await reader.ReadAsync(cancellationToken))
         {
-            results.Add(mapper.Map<ServiceOption>(MapEntity(reader)));
+            results.Add(mapper.Map<ServiceOption>(MapEntity(reader, idOrd, nameOrd, priceOrd)));
         }
 
         return results;
@@ -143,9 +148,14 @@ public class ServiceOptionRepository(IDbConnectionFactory connectionFactory, IMa
 
         var results = new List<ServiceOption>();
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+
+        var idOrd = reader.GetOrdinal("Id");
+        var nameOrd = reader.GetOrdinal("Name");
+        var priceOrd = reader.GetOrdinal("Price");
+
         while (await reader.ReadAsync(cancellationToken))
         {
-            results.Add(mapper.Map<ServiceOption>(MapEntity(reader)));
+            results.Add(mapper.Map<ServiceOption>(MapEntity(reader, idOrd, nameOrd, priceOrd)));
         }
 
         return results;
@@ -197,10 +207,13 @@ public class ServiceOptionRepository(IDbConnectionFactory connectionFactory, IMa
         return table;
     }
 
-    private static ServiceOptionEntity MapEntity(SqlDataReader reader) => new()
+    private static ServiceOptionEntity MapEntity(SqlDataReader reader) =>
+        MapEntity(reader, reader.GetOrdinal("Id"), reader.GetOrdinal("Name"), reader.GetOrdinal("Price"));
+
+    private static ServiceOptionEntity MapEntity(SqlDataReader reader, int idOrd, int nameOrd, int priceOrd) => new()
     {
-        Id = reader.GetGuid(reader.GetOrdinal("Id")),
-        Name = reader.GetString(reader.GetOrdinal("Name")),
-        Price = reader.GetDecimal(reader.GetOrdinal("Price"))
+        Id = reader.GetGuid(idOrd),
+        Name = reader.GetString(nameOrd),
+        Price = reader.GetDecimal(priceOrd)
     };
 }

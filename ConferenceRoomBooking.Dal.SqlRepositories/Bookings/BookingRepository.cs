@@ -139,37 +139,50 @@ public class BookingRepository(IDbConnectionFactory connectionFactory, IMapper m
         var bookings = new List<BookingEntity>();
         var bookingsById = new Dictionary<Guid, BookingEntity>();
 
+        var idOrd = reader.GetOrdinal("Id");
+        var roomIdOrd = reader.GetOrdinal("RoomId");
+        var roomNameOrd = reader.GetOrdinal("RoomName");
+        var userIdOrd = reader.GetOrdinal("UserId");
+        var startTimeOrd = reader.GetOrdinal("StartTime");
+        var endTimeOrd = reader.GetOrdinal("EndTime");
+        var baseRoomCostOrd = reader.GetOrdinal("BaseRoomCost");
+        var servicesCostOrd = reader.GetOrdinal("ServicesCost");
+        var totalPriceOrd = reader.GetOrdinal("TotalPrice");
+        var createdAtUtcOrd = reader.GetOrdinal("CreatedAtUtc");
+        var serviceOptionIdOrdinal = reader.GetOrdinal("ServiceOptionId");
+        var serviceOptionNameOrd = reader.GetOrdinal("ServiceOptionName");
+        var priceAtBookingOrd = reader.GetOrdinal("PriceAtBooking");
+
         while (await reader.ReadAsync(cancellationToken))
         {
-            var bookingId = reader.GetGuid(reader.GetOrdinal("Id"));
+            var bookingId = reader.GetGuid(idOrd);
             if (!bookingsById.TryGetValue(bookingId, out var booking))
             {
                 booking = new BookingEntity
                 {
                     Id = bookingId,
-                    RoomId = reader.GetGuid(reader.GetOrdinal("RoomId")),
-                    RoomName = reader.GetString(reader.GetOrdinal("RoomName")),
-                    UserId = reader.GetGuid(reader.GetOrdinal("UserId")),
-                    StartTime = reader.GetDateTime(reader.GetOrdinal("StartTime")),
-                    EndTime = reader.GetDateTime(reader.GetOrdinal("EndTime")),
-                    BaseRoomCost = reader.GetDecimal(reader.GetOrdinal("BaseRoomCost")),
-                    ServicesCost = reader.GetDecimal(reader.GetOrdinal("ServicesCost")),
-                    TotalPrice = reader.GetDecimal(reader.GetOrdinal("TotalPrice")),
-                    CreatedAtUtc = reader.GetDateTime(reader.GetOrdinal("CreatedAtUtc"))
+                    RoomId = reader.GetGuid(roomIdOrd),
+                    RoomName = reader.GetString(roomNameOrd),
+                    UserId = reader.GetGuid(userIdOrd),
+                    StartTime = reader.GetDateTime(startTimeOrd),
+                    EndTime = reader.GetDateTime(endTimeOrd),
+                    BaseRoomCost = reader.GetDecimal(baseRoomCostOrd),
+                    ServicesCost = reader.GetDecimal(servicesCostOrd),
+                    TotalPrice = reader.GetDecimal(totalPriceOrd),
+                    CreatedAtUtc = reader.GetDateTime(createdAtUtcOrd)
                 };
                 bookingsById.Add(bookingId, booking);
                 bookings.Add(booking);
             }
 
-            var serviceOptionIdOrdinal = reader.GetOrdinal("ServiceOptionId");
             if (!await reader.IsDBNullAsync(serviceOptionIdOrdinal, cancellationToken))
             {
                 booking.ServiceOptions.Add(new BookingServiceOptionEntity
                 {
                     BookingId = bookingId,
                     ServiceOptionId = reader.GetGuid(serviceOptionIdOrdinal),
-                    ServiceOptionName = reader.GetString(reader.GetOrdinal("ServiceOptionName")),
-                    PriceAtBooking = reader.GetDecimal(reader.GetOrdinal("PriceAtBooking"))
+                    ServiceOptionName = reader.GetString(serviceOptionNameOrd),
+                    PriceAtBooking = reader.GetDecimal(priceAtBookingOrd)
                 });
             }
         }

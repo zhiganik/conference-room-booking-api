@@ -118,14 +118,20 @@ public class RoomRepository(IDbConnectionFactory connectionFactory, IMapper mapp
 
         var results = new List<AvailableRoom>();
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+
+        var idOrd = reader.GetOrdinal("Id");
+        var nameOrd = reader.GetOrdinal("Name");
+        var capacityOrd = reader.GetOrdinal("Capacity");
+        var baseHourlyRateOrd = reader.GetOrdinal("BaseHourRate");
+
         while (await reader.ReadAsync(cancellationToken))
         {
             results.Add(new AvailableRoom
             {
-                Id = reader.GetGuid(reader.GetOrdinal("Id")),
-                Name = reader.GetString(reader.GetOrdinal("Name")),
-                Capacity = reader.GetInt32(reader.GetOrdinal("Capacity")),
-                BaseHourlyRate = reader.GetDecimal(reader.GetOrdinal("BaseHourRate"))
+                Id = reader.GetGuid(idOrd),
+                Name = reader.GetString(nameOrd),
+                Capacity = reader.GetInt32(capacityOrd),
+                BaseHourlyRate = reader.GetDecimal(baseHourlyRateOrd)
             });
         }
 
@@ -151,31 +157,40 @@ public class RoomRepository(IDbConnectionFactory connectionFactory, IMapper mapp
     {
         var rooms = new Dictionary<Guid, RoomEntity>();
 
+        var idOrd = reader.GetOrdinal("Id");
+        var nameOrd = reader.GetOrdinal("Name");
+        var capacityOrd = reader.GetOrdinal("Capacity");
+        var baseHourRateOrd = reader.GetOrdinal("BaseHourRate");
+        var createdAtUtcOrd = reader.GetOrdinal("CreatedAtUtc");
+        var isDeletedOrd = reader.GetOrdinal("IsDeleted");
+        var serviceOptionIdOrdinal = reader.GetOrdinal("ServiceOptionId");
+        var serviceOptionNameOrd = reader.GetOrdinal("ServiceOptionName");
+        var serviceOptionPriceOrd = reader.GetOrdinal("ServiceOptionPrice");
+
         while (await reader.ReadAsync(cancellationToken))
         {
-            var roomId = reader.GetGuid(reader.GetOrdinal("Id"));
+            var roomId = reader.GetGuid(idOrd);
             if (!rooms.TryGetValue(roomId, out var room))
             {
                 room = new RoomEntity
                 {
                     Id = roomId,
-                    Name = reader.GetString(reader.GetOrdinal("Name")),
-                    Capacity = reader.GetInt32(reader.GetOrdinal("Capacity")),
-                    BaseHourRate = reader.GetDecimal(reader.GetOrdinal("BaseHourRate")),
-                    CreatedAtUtc = reader.GetDateTime(reader.GetOrdinal("CreatedAtUtc")),
-                    IsDeleted = reader.GetBoolean(reader.GetOrdinal("IsDeleted"))
+                    Name = reader.GetString(nameOrd),
+                    Capacity = reader.GetInt32(capacityOrd),
+                    BaseHourRate = reader.GetDecimal(baseHourRateOrd),
+                    CreatedAtUtc = reader.GetDateTime(createdAtUtcOrd),
+                    IsDeleted = reader.GetBoolean(isDeletedOrd)
                 };
                 rooms.Add(roomId, room);
             }
 
-            var serviceOptionIdOrdinal = reader.GetOrdinal("ServiceOptionId");
             if (!await reader.IsDBNullAsync(serviceOptionIdOrdinal, cancellationToken))
             {
                 room.ServiceOptions.Add(new ServiceOptionEntity
                 {
                     Id = reader.GetGuid(serviceOptionIdOrdinal),
-                    Name = reader.GetString(reader.GetOrdinal("ServiceOptionName")),
-                    Price = reader.GetDecimal(reader.GetOrdinal("ServiceOptionPrice"))
+                    Name = reader.GetString(serviceOptionNameOrd),
+                    Price = reader.GetDecimal(serviceOptionPriceOrd)
                 });
             }
         }

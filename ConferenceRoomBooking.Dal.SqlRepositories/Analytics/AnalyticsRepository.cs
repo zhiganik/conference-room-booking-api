@@ -20,15 +20,23 @@ public class AnalyticsRepository(IDbConnectionFactory connectionFactory) : IAnal
 
         var results = new List<RoomPerformance>();
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+
+        var roomIdOrd = reader.GetOrdinal("RoomId");
+        var roomNameOrd = reader.GetOrdinal("RoomName");
+        var totalBookingsOrd = reader.GetOrdinal("TotalBookings");
+        var totalRevenueOrd = reader.GetOrdinal("TotalRevenue");
+        var avgBookingDurationMinutesOrd = reader.GetOrdinal("AvgBookingDurationMinutes");
+        var revenueRankOrd = reader.GetOrdinal("RevenueRank");
+
         while (await reader.ReadAsync(cancellationToken))
         {
             results.Add(new RoomPerformance(
-                reader.GetGuid(reader.GetOrdinal("RoomId")),
-                reader.GetString(reader.GetOrdinal("RoomName")),
-                reader.GetInt32(reader.GetOrdinal("TotalBookings")),
-                reader.GetDecimal(reader.GetOrdinal("TotalRevenue")),
-                reader.GetDecimal(reader.GetOrdinal("AvgBookingDurationMinutes")),
-                reader.GetInt32(reader.GetOrdinal("RevenueRank"))));
+                reader.GetGuid(roomIdOrd),
+                reader.GetString(roomNameOrd),
+                reader.GetInt32(totalBookingsOrd),
+                reader.GetDecimal(totalRevenueOrd),
+                reader.GetDecimal(avgBookingDurationMinutesOrd),
+                reader.GetInt32(revenueRankOrd)));
         }
 
         return results;
@@ -46,15 +54,23 @@ public class AnalyticsRepository(IDbConnectionFactory connectionFactory) : IAnal
 
         var results = new List<ServicePerformance>();
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+
+        var idOrd = reader.GetOrdinal("Id");
+        var nameOrd = reader.GetOrdinal("Name");
+        var timesSelectedOrd = reader.GetOrdinal("TimesSelected");
+        var distinctRoomsUsedInOrd = reader.GetOrdinal("DistinctRoomsUsedIn");
+        var totalRevenueOrd = reader.GetOrdinal("TotalRevenue");
+        var revenueRankOrd = reader.GetOrdinal("RevenueRank");
+
         while (await reader.ReadAsync(cancellationToken))
         {
             results.Add(new ServicePerformance(
-                reader.GetGuid(reader.GetOrdinal("Id")),
-                reader.GetString(reader.GetOrdinal("Name")),
-                reader.GetInt32(reader.GetOrdinal("TimesSelected")),
-                reader.GetInt32(reader.GetOrdinal("DistinctRoomsUsedIn")),
-                reader.GetDecimal(reader.GetOrdinal("TotalRevenue")),
-                reader.GetInt32(reader.GetOrdinal("RevenueRank"))));
+                reader.GetGuid(idOrd),
+                reader.GetString(nameOrd),
+                reader.GetInt32(timesSelectedOrd),
+                reader.GetInt32(distinctRoomsUsedInOrd),
+                reader.GetDecimal(totalRevenueOrd),
+                reader.GetInt32(revenueRankOrd)));
         }
 
         return results;
