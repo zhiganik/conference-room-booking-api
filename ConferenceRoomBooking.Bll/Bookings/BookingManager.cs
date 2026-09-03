@@ -1,5 +1,4 @@
 using ConferenceRoomBooking.Bll.Common.Bookings;
-using ConferenceRoomBooking.Bll.Common.Bookings.Exceptions;
 using ConferenceRoomBooking.Bll.Common.Bookings.Models;
 using ConferenceRoomBooking.Bll.Common.Rooms;
 using ConferenceRoomBooking.Bll.Common.Rooms.Models;
@@ -43,11 +42,6 @@ public class BookingManager(
         Guid bookingId;
         using (await roomBookingLock.AcquireAsync(roomId, cancellationToken))
         {
-            if (await bookingRepository.ExistsOverlappingAsync(roomId, startTime, endTime, cancellationToken))
-            {
-                throw new RoomUnavailableException("Room is already booked during the requested time window.");
-            }
-
             var booking = new Booking
             {
                 RoomId = room.Id,

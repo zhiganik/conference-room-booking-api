@@ -17,6 +17,16 @@ BEGIN
 
     BEGIN TRANSACTION;
 
+    IF EXISTS (
+        SELECT 1
+        FROM [MZhehistovskyi].[Bookings] WITH (UPDLOCK, HOLDLOCK)
+        WHERE [RoomId] = @RoomId AND [StartTime] < @EndTime AND [EndTime] > @StartTime
+    )
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 50001, 'Room is already booked during the requested time window.', 1;
+    END
+
     INSERT INTO [MZhehistovskyi].[Bookings]
         ([RoomId], [RoomName], [UserId], [StartTime], [EndTime], [BaseRoomCost], [ServicesCost], [TotalPrice])
     OUTPUT INSERTED.[Id] INTO @BookingIds

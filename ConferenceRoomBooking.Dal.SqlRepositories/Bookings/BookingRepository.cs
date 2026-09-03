@@ -1,6 +1,7 @@
 using System.Data;
 using AutoMapper;
 using ConferenceRoomBooking.Bll.Common.Bookings;
+using ConferenceRoomBooking.Bll.Common.Bookings.Exceptions;
 using ConferenceRoomBooking.Bll.Common.Bookings.Models;
 using ConferenceRoomBooking.Dal.SqlRepositories.Bookings.Entities;
 using ConferenceRoomBooking.Dal.SqlRepositories.Shared;
@@ -10,6 +11,10 @@ namespace ConferenceRoomBooking.Dal.SqlRepositories.Bookings;
 
 public class BookingRepository(IDbConnectionFactory connectionFactory, IMapper mapper) : IBookingRepository
 {
+    /// <summary>THROW error number raised by sp_Bookings_Create when the UPDLOCK/HOLDLOCK overlap
+    /// check finds a conflicting booking. Keep in sync with that procedure.</summary>
+    private const int RoomUnavailableErrorNumber = 50001;
+
     public async Task<Guid> CreateAsync(Booking booking, CancellationToken cancellationToken)
     {
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
@@ -30,8 +35,15 @@ public class BookingRepository(IDbConnectionFactory connectionFactory, IMapper m
         command.Parameters.AddWithValue("@TotalPrice", booking.TotalPrice);
         AddServiceOptionsParameter(command, booking.Services);
 
-        var result = await command.ExecuteScalarAsync(cancellationToken);
-        return (Guid)result!;
+        try
+        {
+            var result = await command.ExecuteScalarAsync(cancellationToken);
+            return (Guid)result!;
+        }
+        catch (SqlException ex) when (ex.Number == RoomUnavailableErrorNumber)
+        {
+            throw new RoomUnavailableException("Room is already booked during the requested time window.");
+        }
     }
 
     public async Task<Booking?> GetByIdAsync(Guid bookingId, CancellationToken cancellationToken)
