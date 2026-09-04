@@ -1,0 +1,200 @@
+using System.Data;
+using AutoMapper;
+using ConferenceRoomBooking.Bll.Common.Rooms;
+using ConferenceRoomBooking.Bll.Common.Rooms.Models;
+using ConferenceRoomBooking.Dal.SqlRepositories.Rooms.Entities;
+using ConferenceRoomBooking.Dal.SqlRepositories.ServiceOptions.Entities;
+using ConferenceRoomBooking.Dal.SqlRepositories.Shared;
+using Microsoft.Data.SqlClient;
+
+namespace ConferenceRoomBooking.Dal.SqlRepositories.Rooms;
+
+public class RoomRepository(IDbConnectionFactory connectionFactory, IMapper mapper) : IRoomRepository
+{
+    public async Task<Room> CreateAsync(Room room, CancellationToken cancellationToken)
+    {
+        await using var connection = (SqlConnection)connectionFactory.CreateConnection();
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command = new SqlCommand($"{DbSchema.Name}.sp_Rooms_Create", connection)
+        {
+            CommandType = CommandType.StoredProcedure
+        };
+
+        command.Parameters.AddWithValue("@Name", room.Name);
+        command.Parameters.AddWithValue("@Capacity", room.Capacity);
+        command.Parameters.AddWithValue("@BaseHourRate", room.BaseHourRate);
+        AddServiceOptionIdsParameter(command, room.Services.Select(s => s.Id));
+
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        var entities = await ReadRoomsAsync(reader, cancellationToken);
+
+        return mapper.Map<Room>(entities.Single());
+    }
+
+    public async Task<Room?> GetByIdAsync(Guid roomId, CancellationToken cancellationToken)
+    {
+        await using var connection = (SqlConnection)connectionFactory.CreateConnection();
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command = new SqlCommand($"{DbSchema.Name}.sp_Rooms_GetById", connection)
+        {
+            CommandType = CommandType.StoredProcedure
+        };
+
+        command.Parameters.AddWithValue("@Id", roomId);
+
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        var entities = await ReadRoomsAsync(reader, cancellationToken);
+
+        return entities.Count == 0 ? null : mapper.Map<Room>(entities[0]);
+    }
+
+    public async Task<Room?> GetByNameAsync(string name, CancellationToken cancellationToken)
+    {
+        await using var connection = (SqlConnection)connectionFactory.CreateConnection();
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command = new SqlCommand($"{DbSchema.Name}.sp_Rooms_GetByName", connection)
+        {
+            CommandType = CommandType.StoredProcedure
+        };
+
+        command.Parameters.AddWithValue("@Name", name);
+
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        var entities = await ReadRoomsAsync(reader, cancellationToken);
+
+        return entities.Count == 0 ? null : mapper.Map<Room>(entities[0]);
+    }
+
+    public async Task UpdateAsync(Room room, CancellationToken cancellationToken)
+    {
+        await using var connection = (SqlConnection)connectionFactory.CreateConnection();
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command = new SqlCommand($"{DbSchema.Name}.sp_Rooms_Update", connection)
+        {
+            CommandType = CommandType.StoredProcedure
+        };
+
+        command.Parameters.AddWithValue("@Id", room.Id);
+        command.Parameters.AddWithValue("@Name", room.Name);
+        command.Parameters.AddWithValue("@Capacity", room.Capacity);
+        command.Parameters.AddWithValue("@BaseHourRate", room.BaseHourRate);
+        AddServiceOptionIdsParameter(command, room.Services.Select(s => s.Id));
+
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    public async Task SoftDeleteAsync(Guid roomId, CancellationToken cancellationToken)
+    {
+        await using var connection = (SqlConnection)connectionFactory.CreateConnection();
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command = new SqlCommand($"{DbSchema.Name}.sp_Rooms_SoftDelete", connection)
+        {
+            CommandType = CommandType.StoredProcedure
+        };
+
+        command.Parameters.AddWithValue("@Id", roomId);
+
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<AvailableRoom>> SearchAvailableAsync(int capacity, DateTime startTime, DateTime endTime, CancellationToken cancellationToken)
+    {
+        await using var connection = (SqlConnection)connectionFactory.CreateConnection();
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command = new SqlCommand($"{DbSchema.Name}.sp_Rooms_SearchAvailable", connection)
+        {
+            CommandType = CommandType.StoredProcedure
+        };
+
+        command.Parameters.AddWithValue("@Capacity", capacity);
+        command.Parameters.AddWithValue("@StartTime", startTime);
+        command.Parameters.AddWithValue("@EndTime", endTime);
+
+        var results = new List<AvailableRoom>();
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+
+        var idOrd = reader.GetOrdinal("Id");
+        var nameOrd = reader.GetOrdinal("Name");
+        var capacityOrd = reader.GetOrdinal("Capacity");
+        var baseHourlyRateOrd = reader.GetOrdinal("BaseHourRate");
+
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            results.Add(new AvailableRoom
+            {
+                Id = reader.GetGuid(idOrd),
+                Name = reader.GetString(nameOrd),
+                Capacity = reader.GetInt32(capacityOrd),
+                BaseHourlyRate = reader.GetDecimal(baseHourlyRateOrd)
+            });
+        }
+
+        return results;
+    }
+
+    private static void AddServiceOptionIdsParameter(SqlCommand command, IEnumerable<Guid> serviceOptionIds)
+    {
+        var table = new DataTable();
+        table.Columns.Add("Id", typeof(Guid));
+
+        foreach (var id in serviceOptionIds)
+        {
+            table.Rows.Add(id);
+        }
+
+        var parameter = command.Parameters.AddWithValue("@ServiceOptionIds", table);
+        parameter.SqlDbType = SqlDbType.Structured;
+        parameter.TypeName = $"{DbSchema.Name}.GuidIdList";
+    }
+
+    private static async Task<List<RoomEntity>> ReadRoomsAsync(SqlDataReader reader, CancellationToken cancellationToken)
+    {
+        var rooms = new Dictionary<Guid, RoomEntity>();
+
+        var idOrd = reader.GetOrdinal("Id");
+        var nameOrd = reader.GetOrdinal("Name");
+        var capacityOrd = reader.GetOrdinal("Capacity");
+        var baseHourRateOrd = reader.GetOrdinal("BaseHourRate");
+        var createdAtUtcOrd = reader.GetOrdinal("CreatedAtUtc");
+        var isDeletedOrd = reader.GetOrdinal("IsDeleted");
+        var serviceOptionIdOrdinal = reader.GetOrdinal("ServiceOptionId");
+        var serviceOptionNameOrd = reader.GetOrdinal("ServiceOptionName");
+        var serviceOptionPriceOrd = reader.GetOrdinal("ServiceOptionPrice");
+
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            var roomId = reader.GetGuid(idOrd);
+            if (!rooms.TryGetValue(roomId, out var room))
+            {
+                room = new RoomEntity
+                {
+                    Id = roomId,
+                    Name = reader.GetString(nameOrd),
+                    Capacity = reader.GetInt32(capacityOrd),
+                    BaseHourRate = reader.GetDecimal(baseHourRateOrd),
+                    CreatedAtUtc = reader.GetDateTime(createdAtUtcOrd),
+                    IsDeleted = reader.GetBoolean(isDeletedOrd)
+                };
+                rooms.Add(roomId, room);
+            }
+
+            if (!await reader.IsDBNullAsync(serviceOptionIdOrdinal, cancellationToken))
+            {
+                room.ServiceOptions.Add(new ServiceOptionEntity
+                {
+                    Id = reader.GetGuid(serviceOptionIdOrdinal),
+                    Name = reader.GetString(serviceOptionNameOrd),
+                    Price = reader.GetDecimal(serviceOptionPriceOrd)
+                });
+            }
+        }
+
+        return rooms.Values.ToList();
+    }
+}

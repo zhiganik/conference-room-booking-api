@@ -1,7 +1,7 @@
 # Conference Room Booking API
 
 A simple, secure API for managing conference rooms, bookings, and rental
-pricing — built with ASP.NET Core (.NET 10), EF Core, and SQL Server.
+pricing — built with ASP.NET Core (.NET 10), raw ADO.NET, and Azure SQL.
 
 ## Business task
 
@@ -35,32 +35,69 @@ Admins/managers also need day-to-day business reports — see
 ## Tech stack
 
 - **.NET 10 / ASP.NET Core Web API**
-- **Entity Framework Core 10** + **SQL Server**
-- **ASP.NET Core Identity** + **JWT bearer authentication**, role-based
-  authorization policies
+- **Raw ADO.NET** (`Microsoft.Data.SqlClient`) — no EF Core, no ORM;
+  every query is `CommandType.StoredProcedure` only (no inline SQL, no
+  dynamic SQL)
+- **Azure SQL Database**, authenticated via **Microsoft Entra ID**
+  (`Azure.Identity`'s `DefaultAzureCredential`) — no SQL logins or
+  passwords anywhere in configuration
+- **DbUp** — forward-only, journal-tracked schema migrations plus
+  stored-procedure scripts, both run automatically on app startup (no
+  separate publish/deploy step)
+- **Custom `Users` table** + **JWT bearer authentication** (no ASP.NET
+  Identity), PBKDF2 password hashing, role-based authorization policies
+- **AutoMapper** (Entity ↔ Model in the data layer, Model ↔ Dto in the
+  web layer)
 - **FluentValidation** (with automatic MVC validation)
 - **Serilog** (console sink)
 - **Swashbuckle / Swagger** (with a JWT-aware "Authorize" button)
-- **Docker** / Docker Compose for local orchestration
+- **Docker** / Docker Compose for containerized runs
 
 ## Architecture & technical decisions
 
-The solution is split into three projects to keep concerns isolated and
-the codebase scalable as it grows:
+The solution is split into four projects along Service/BLL/Common/DAL
+lines, to keep concerns isolated and the codebase scalable as it grows:
 
-- **`ConferenceRoomBooking.Api`** — HTTP layer only: controllers, DI/
-  pipeline configuration, Swagger setup, startup seeders.
-- **`ConferenceRoomBooking.Application`** — business logic: orchestrators
-  (one per feature area), DTOs, FluentValidation validators, mappers,
-  pricing/availability calculators, JWT issuing, and typed exceptions.
-- **`ConferenceRoomBooking.DataLayer`** — EF Core `DbContext`, entity
-  configurations, migrations, and reusable IQueryable extensions.
+- **`ConferenceRoomBooking.Web`** — HTTP layer only: controllers, DI/
+  pipeline configuration, Swagger setup, and the startup hooks that run
+  DB migrations and seed data.
+- **`ConferenceRoomBooking.Bll`** — business logic: managers (one per
+  feature area, e.g. `RoomManager`, `BookingManager`), JWT issuing,
+  password hashing, the rental-price calculator, and the per-room
+  booking lock.
+- **`ConferenceRoomBooking.Bll.Common`** — shared contracts only: domain
+  models, manager/repository interfaces, typed exceptions, and
+  cross-cutting security/settings/abstractions. Depends on nothing else
+  in the solution, so it's safe for both `Bll` and
+  `Dal.SqlRepositories` to depend on it without a circular reference.
+- **`ConferenceRoomBooking.Dal.SqlRepositories`** — persistence:
+  ADO.NET repositories (stored procedures only), the DbUp migration
+  scripts (`Migrations/Scripts/01_Migrations` for schema, `02_Procedures`
+  for stored procedures), and the Entity ↔ Model AutoMapper profile.
+
+Dependency direction is one-way: `Web` → `Bll`, `Bll.Common`,
+`Dal.SqlRepositories` (the last one only for DI wiring); `Bll` →
+`Bll.Common`; `Dal.SqlRepositories` → `Bll.Common`; `Bll.Common` depends
+on nothing.
 
 Notable decisions in service of clean, scalable, secure code:
 
-- **Controllers stay thin** — they only translate HTTP ↔ orchestrator
-  calls; all business rules live in `Application` orchestrators, each
-  behind an interface for testability.
+- **Controllers stay thin** — they only translate HTTP ↔ manager calls;
+  all business rules live in `Bll` managers, each behind an interface
+  for testability.
+- **No ORM, stored procedures only** — every repository method calls a
+  named stored procedure via `CommandType.StoredProcedure`; there's no
+  inline or dynamically-built SQL anywhere in the app, which keeps every
+  query DBA-reviewable and closes off SQL injection as an attack surface
+  entirely.
+- **Migrations run themselves** — DbUp applies pending scripts on every
+  startup: schema/seed-data scripts run exactly once (journal-tracked),
+  stored-procedure scripts (`CREATE OR ALTER`) re-run every startup, so
+  editing a procedure in place is safe and normal.
+- **Azure SQL + Entra ID, no passwords** — the connection string carries
+  no credentials; `DefaultAzureCredential` resolves whichever identity
+  is available (see [Prerequisites](#prerequisites) below for what that
+  means for local runs).
 - **Centralized error handling** — a single `GlobalExceptionHandler` maps
   typed exceptions (`NotFoundException`, `ConflictException`,
   `RoomUnavailableException`, `UnauthorizedException`) to the correct
@@ -73,87 +110,94 @@ Notable decisions in service of clean, scalable, secure code:
   rather than ad-hoc role checks.
 - **Soft delete for rooms** — deleting a room with existing bookings
   doesn't destroy historical booking/revenue data; it's flagged
-  `IsDeleted` and excluded from queries via a reusable query extension.
-- **Idempotent startup seeding** — reference data (rooms, services) and
-  role seeding only insert what's missing, so it's safe to restart the
-  container repeatedly.
+  `IsDeleted` and every procedure that reads `Rooms` filters it out
+  explicitly (there's no ORM query filter to do it implicitly).
+- **Startup seeding** — reference data (rooms, services, two demo users)
+  and a handful of sample bookings are inserted on every startup. Users
+  and service options are idempotent (skip-if-already-present); rooms
+  and sample bookings currently are not — see
+  [Seed data](#seed-data) for the practical implication.
+
+## Prerequisites
+
+- The [.NET 10 SDK](https://dotnet.microsoft.com/download).
+- Network access to the target Azure SQL Database
+  (`rg-academy-6.database.windows.net`, configured in
+  `appsettings.Development.json`), and an Azure identity with rights on
+  it. `DefaultAzureCredential` tries several credential sources in
+  order — the one that matters for local development is **whichever
+  account you're signed into in Visual Studio** (or `az login` via the
+  Azure CLI, if you use that instead). This is the setup this project
+  has actually been run and verified against — see
+  [Running locally](#running-locally).
+- [Docker](https://www.docker.com/) with Compose support, only if you
+  want the containerized run — see the caveat under
+  [Running with Docker](#running-with-docker) before relying on it.
+
+## Running locally
+
+This is the path that's actually been used to run and verify this
+project end-to-end.
+
+1. Make sure Visual Studio (or the Azure CLI, via `az login`) is signed
+   into an Azure account that has access to `rg-academy-6`.
+2. Run the API:
+   ```bash
+   dotnet run --project ConferenceRoomBooking.Web
+   ```
+   (or press F5 in Visual Studio).
+3. On startup the app connects to Azure SQL using that identity, runs
+   any pending DbUp migrations/procedure scripts automatically, seeds
+   reference + demo data (see [Seed data](#seed-data)), and starts
+   listening — no separate migration or publish step.
+4. Swagger UI is served at the URL printed on startup (see
+   `ConferenceRoomBooking.Web/Properties/launchSettings.json`, e.g.
+   `http://localhost:5173/swagger`).
 
 ## Running with Docker
-
-### Prerequisites
-- [Docker](https://www.docker.com/) with Compose support (Docker Desktop,
-  or Docker Engine + the Compose plugin).
-- The [.NET SDK](https://dotnet.microsoft.com/download) *on the host*, only
-  needed to run EF Core migrations (see step 2) — the API itself runs
-  entirely inside the container.
-
-### 1. Start the containers
-
-From the repository root:
 
 ```bash
 docker compose up --build -d
 ```
 
-This builds the API image (`ConferenceRoomBooking.Api/Dockerfile`, a
-multi-stage SDK-build → ASP.NET-runtime image) and starts two containers:
+This builds a single image (`ConferenceRoomBooking.Web/Dockerfile`,
+multi-stage SDK-build → ASP.NET-runtime) and starts one container:
 
-| Service      | Container name                     | Exposed on             |
-|--------------|-------------------------------------|-------------------------|
-| API          | `conferenceroombooking.api`         | `http://localhost:5000` |
-| SQL Server   | `conferenceroombooking.sqlserver`   | `localhost:1433`        |
+| Service      | Container name                 | Exposed on              |
+|--------------|----------------------------------|---------------------------|
+| API          | `conferenceroombooking.web`      | `http://localhost:5000`  |
 
-`compose.yaml` runs the API with `ASPNETCORE_ENVIRONMENT=Development`, so
-Swagger UI is enabled even in the containerized build.
+`docker-compose.yml` runs it with `ASPNETCORE_ENVIRONMENT=Development`,
+so Swagger UI is enabled. There's no separate database container —
+migrations, seeding, and the app itself all run inside this one
+container, the same way they do locally.
 
-### 2. Apply database migrations (required)
+> ⚠️ **Azure authentication inside the container is unverified.**
+> `DefaultAzureCredential` needs a reachable identity source, and this
+> project's compose files don't mount an Azure CLI/Visual Studio
+> credential cache or set service-principal environment variables
+> (`AZURE_CLIENT_ID` / `AZURE_TENANT_ID` / `AZURE_CLIENT_SECRET`) for
+> the container to authenticate with. This project has only actually
+> been run via [`dotnet run`/Visual Studio](#running-locally) so far. If
+> you need the container path to work, add one of those credential
+> sources to `docker-compose.override.yml` first.
 
-The container does **not** run migrations automatically. Before (or
-right after) the first `docker compose up`, apply them from the host once
-the SQL Server container is healthy:
+Swagger UI: **http://localhost:5000/swagger** · Base URL:
+**http://localhost:5000/api**
 
-```bash
-dotnet tool install --global dotnet-ef   # first time only
-dotnet ef database update `
-  --project ConferenceRoomBooking.DataLayer `
-  --startup-project ConferenceRoomBooking.Api
-```
-
-(On bash/macOS/Linux, replace the trailing `` ` `` line-continuations with
-`\`.) This uses the connection string in `appsettings.Development.json`,
-which already points at `localhost,1433` — matching the port SQL Server
-publishes to the host.
-
-Once the schema exists, restart the API container so startup seeding can
-run against it:
+### Stopping
 
 ```bash
-docker compose restart conferenceroombooking.api
+docker compose down
 ```
 
-On startup the API seeds roles (`User`, `Admin`), the 3 rooms, 3 services,
-and a handful of sample bookings — see [Seed data](#seed-data). Seeding is
-safe to run repeatedly; it only inserts what's missing.
-
-### 3. Explore the API
-
-- Swagger UI: **http://localhost:5000/swagger**
-- Base URL: **http://localhost:5000/api**
-
-### Stopping / resetting
-
-```bash
-docker compose down        # stop containers, keep the DB volume
-docker compose down -v     # stop containers and wipe the DB volume
-```
-
-> ⚠️ **Dev-only configuration.** `compose.yaml` hardcodes the SQL Server
-> `SA` password and forces `ASPNETCORE_ENVIRONMENT=Development` (which
-> also disables HTTPS redirection and exposes Swagger). This is fine for
-> local development/demo purposes but must not be reused as-is for a
-> shared or production deployment — replace the password and JWT signing
-> key (currently in `appsettings.Development.json`, clearly marked as
-> dev-only) with real secrets.
+> ⚠️ **Dev-only configuration.** `docker-compose.yml` forces
+> `ASPNETCORE_ENVIRONMENT=Development` (which also disables HTTPS
+> redirection and exposes Swagger), and the JWT signing key in
+> `appsettings.Development.json` is a placeholder committed for local
+> convenience (explicitly marked as dev-only in that file, to avoid
+> needing a `.env`/user-secrets setup just to try the project). Neither
+> is fit for a shared or production deployment as-is.
 
 ## Authentication quick-start
 
@@ -169,12 +213,10 @@ To call protected endpoints in Swagger: click **Authorize**, paste the
 token **without** the `Bearer ` prefix (Swagger adds it automatically),
 and confirm. Outside Swagger, send it as `Authorization: Bearer <token>`.
 
-> There's no pre-seeded admin account — registration always grants the
-> `User` role. Every business endpoint (rooms, bookings, services,
-> analytics) only requires the `User`-or-`Admin` policy, so a normal
-> registered account can exercise the whole API. An `Admin`-only policy
-> exists in code (`AuthorizationPolicies.RequireAdmin`) for future
-> endpoints that should be restricted further.
+> Registration always grants the `User` role — there's no self-service
+> way to become `Admin`. A pre-seeded admin account is available instead
+> (see [Seed data](#seed-data)) for exercising `Admin`-only endpoints
+> (currently just Analytics and write access to Rooms/Service options).
 
 ## API endpoint breakdown
 
@@ -204,6 +246,7 @@ or `Admin` role). ⭐ = one of the assignment's 5 core methods.
 |--------|-------------------------|-------------------------------------------------------------------------|
 | POST   | `/bookings`             | ⭐ Book a room (room, start time, duration, services) → returns the booking with a full price breakdown |
 | GET    | `/bookings/{bookingId}` | Get a booking by ID                                                    |
+| GET    | `/bookings/my`          | Get the current user's own bookings                                    |
 
 ### Service options (`/api/serviceoptions`) 🔑
 
@@ -222,7 +265,10 @@ See [Reports & analytics](#reports--analytics) below.
 ## Reports & analytics
 
 Two read-only reporting endpoints, aimed at giving the business insight
-into room and service performance:
+into room and service performance. Backed by SQL views
+(`RoomPerformanceView` / `ServicePerformanceView`) rather than
+per-request aggregation, so the ranking logic (`RANK() OVER`) lives in
+one place in the schema.
 
 | Method | Route                              | What it returns                                                                 |
 |--------|--------------------------------------|-----------------------------------------------------------------------------------|
@@ -231,29 +277,27 @@ into room and service performance:
 
 ## Seed data
 
-On every startup the API seeds (idempotently — existing rows are left
-untouched):
+On every startup the API seeds:
 
-- **Roles**: `User`, `Admin`
+- **Users**: a `seed.bookings@conference-room-booking.local` /
+  `Seed@Bookings123!` account (`User` role, owns the sample bookings
+  below) and an `admin@gmail.com` / `Admin1234!` account (`Admin` role,
+  the one pre-seeded way to reach `Admin`-only endpoints). Both are
+  idempotent — skipped if the email already exists.
 - **Rooms**: Room A (50 people, 2000₴/hour), Room B (100 people,
-  3500₴/hour), Room C (30 people, 1500₴/hour)
-- **Services**: Projector (500₴), Wi-Fi (300₴), Sound (700₴)
+  3500₴/hour), Room C (30 people, 1500₴/hour). Idempotent — skipped if a
+  room with that name already exists.
+- **Services**: Projector (500₴), Wi-Fi (300₴), Sound (700₴). Idempotent
+  — skipped if a service with that name already exists.
 - **~9 sample bookings** spread across the rooms and services over the
   past month, with prices already computed by the same pricing engine
   used at runtime — useful for trying the analytics endpoints immediately.
+  Idempotent *within the same calendar day* (skipped if an overlapping
+  booking already exists for that room/time) — but each booking's start
+  time is computed relative to "today" so the demo data always looks
+  recent, so restarting on a **later day** computes different timestamps
+  and adds a fresh batch alongside the previous one rather than matching it.
 
-## Local development without Docker
-
-1. Start a local or containerized SQL Server instance on `localhost,1433`
-   (or update `ConnectionStrings:DefaultConnection` in
-   `appsettings.Development.json`).
-2. Apply migrations:
-   ```bash
-   dotnet ef database update --project ConferenceRoomBooking.DataLayer --startup-project ConferenceRoomBooking.Api
-   ```
-3. Run the API:
-   ```bash
-   dotnet run --project ConferenceRoomBooking.Api
-   ```
-4. Swagger UI is served at the URL printed on startup (see
-   `Properties/launchSettings.json`, e.g. `http://localhost:5173/swagger`).
+Safe to restart repeatedly on any given day; restarting on a new day adds
+another round of sample bookings (rooms, services, and users won't
+duplicate).
