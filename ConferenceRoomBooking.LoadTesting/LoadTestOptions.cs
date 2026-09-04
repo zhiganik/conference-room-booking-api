@@ -1,11 +1,11 @@
 namespace ConferenceRoomBooking.LoadTesting;
 
-public sealed record LoadTestOptions(int Requests, int Parallelism, string BaseUrl)
+public sealed record LoadTestOptions(int Requests, IReadOnlyList<int> ParallelismLevels, string BaseUrl)
 {
     public static LoadTestOptions Parse(string[] args)
     {
         var requests = 1000;
-        var parallelism = 10;
+        var parallelismLevels = new List<int> { 10, 50, 100 };
         var baseUrl = "http://localhost:5000";
 
         for (var i = 0; i < args.Length - 1; i++)
@@ -14,9 +14,12 @@ public sealed record LoadTestOptions(int Requests, int Parallelism, string BaseU
             {
                 requests = parsedRequests;
             }
-            else if (args[i] == "--parallelism" && int.TryParse(args[i + 1], out var parsedParallelism))
+            else if (args[i] == "--parallelism-levels")
             {
-                parallelism = parsedParallelism;
+                parallelismLevels = args[i + 1]
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(int.Parse)
+                    .ToList();
             }
             else if (args[i] == "--base-url")
             {
@@ -24,6 +27,6 @@ public sealed record LoadTestOptions(int Requests, int Parallelism, string BaseU
             }
         }
 
-        return new LoadTestOptions(requests, parallelism, baseUrl);
+        return new LoadTestOptions(requests, parallelismLevels, baseUrl);
     }
 }

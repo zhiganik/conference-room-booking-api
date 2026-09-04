@@ -1,6 +1,5 @@
 namespace ConferenceRoomBooking.LoadTesting;
 
-/// <summary>Formats a completed run's stats and per-thread breakdown to the console.</summary>
 public static class ConsoleReporter
 {
     public static void Report(string scenarioName, RequestStatistics stats, RequestResult[] results)

@@ -3,18 +3,14 @@ using ConferenceRoomBooking.LoadTesting.Scenarios;
 
 namespace ConferenceRoomBooking.LoadTesting;
 
-/// <summary>
-/// Runs a scenario <c>Requests</c> times with at most <c>Parallelism</c> requests in flight
-/// at once. Knows nothing about GET/POST/PUT or endpoints — that's all in the scenario.
-/// </summary>
 public static class LoadTestRunner
 {
     public static async Task<(RequestResult[] Results, TimeSpan TotalTime)> RunAsync(
-        HttpClient httpClient, IRequestScenario scenario, LoadTestOptions options)
+        HttpClient httpClient, IRequestScenario scenario, int requests, int parallelism)
     {
-        var results = new RequestResult[options.Requests];
+        var results = new RequestResult[requests];
 
-        using var semaphore = new SemaphoreSlim(options.Parallelism);
+        using var semaphore = new SemaphoreSlim(parallelism);
 
         async Task RunOneAsync(int index)
         {
@@ -30,7 +26,7 @@ public static class LoadTestRunner
         }
 
         var overallStopwatch = Stopwatch.StartNew();
-        var tasks = Enumerable.Range(0, options.Requests).Select(RunOneAsync);
+        var tasks = Enumerable.Range(0, requests).Select(RunOneAsync);
         await Task.WhenAll(tasks);
         overallStopwatch.Stop();
 
