@@ -2,6 +2,7 @@ using System.Data;
 using ConferenceRoomBooking.Bll.Common.Analytics;
 using ConferenceRoomBooking.Bll.Common.Analytics.Models;
 using ConferenceRoomBooking.Dal.SqlRepositories.Shared;
+using ConferenceRoomBooking.Utils.Sql;
 using Microsoft.Data.SqlClient;
 
 namespace ConferenceRoomBooking.Dal.SqlRepositories.Analytics;

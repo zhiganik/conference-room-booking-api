@@ -4,6 +4,7 @@ using ConferenceRoomBooking.Bll.Common.ServiceOptions;
 using ConferenceRoomBooking.Bll.Common.ServiceOptions.Models;
 using ConferenceRoomBooking.Dal.SqlRepositories.ServiceOptions.Entities;
 using ConferenceRoomBooking.Dal.SqlRepositories.Shared;
+using ConferenceRoomBooking.Utils.Sql;
 using Microsoft.Data.SqlClient;
 
 namespace ConferenceRoomBooking.Dal.SqlRepositories.ServiceOptions;

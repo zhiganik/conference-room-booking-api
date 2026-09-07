@@ -5,6 +5,7 @@ using ConferenceRoomBooking.Bll.Common.Bookings.Exceptions;
 using ConferenceRoomBooking.Bll.Common.Bookings.Models;
 using ConferenceRoomBooking.Dal.SqlRepositories.Bookings.Entities;
 using ConferenceRoomBooking.Dal.SqlRepositories.Shared;
+using ConferenceRoomBooking.Utils.Sql;
 using Microsoft.Data.SqlClient;
 
 namespace ConferenceRoomBooking.Dal.SqlRepositories.Bookings;

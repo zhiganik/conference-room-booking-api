@@ -8,7 +8,7 @@ using ConferenceRoomBooking.Dal.SqlRepositories.Auth;
 using ConferenceRoomBooking.Dal.SqlRepositories.Bookings;
 using ConferenceRoomBooking.Dal.SqlRepositories.Rooms;
 using ConferenceRoomBooking.Dal.SqlRepositories.ServiceOptions;
-using ConferenceRoomBooking.Dal.SqlRepositories.Shared;
+using ConferenceRoomBooking.Utils.Sql;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ConferenceRoomBooking.Dal.SqlRepositories;

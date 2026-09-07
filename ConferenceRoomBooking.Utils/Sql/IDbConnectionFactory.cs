@@ -1,10 +1,10 @@
 using System.Data;
 
-namespace ConferenceRoomBooking.Dal.SqlRepositories.Shared;
+namespace ConferenceRoomBooking.Utils.Sql;
 
 /// <summary>
-/// Creates ADO.NET connections to the application database. Callers own the connection's lifetime
-/// (including opening it) — this only builds it.
+/// Creates ADO.NET connections to an Azure SQL database, authenticated via Microsoft Entra ID.
+/// Callers own the connection's lifetime (including opening it) — this only builds it.
 /// </summary>
 public interface IDbConnectionFactory
 {

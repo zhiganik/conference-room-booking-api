@@ -4,7 +4,7 @@ using Azure.Identity;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
-namespace ConferenceRoomBooking.Dal.SqlRepositories.Shared;
+namespace ConferenceRoomBooking.Utils.Sql;
 
 public class SqlConnectionFactory(IConfiguration configuration) : IDbConnectionFactory
 {
