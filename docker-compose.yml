@@ -21,7 +21,7 @@ services:
     container_name: conferenceroombooking.telegramnotifier
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
-      Telegram__BotToken: "${TELEGRAM_BOT_TOKEN}"
+      Telegram__BotToken: "${Telegram__BotToken}"
     build:
       context: .
       dockerfile: ConferenceRoomBooking.TelegramNotifier/Dockerfile

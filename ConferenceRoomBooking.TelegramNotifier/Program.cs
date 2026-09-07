@@ -3,7 +3,7 @@ using ConferenceRoomBooking.TelegramNotifier.Web.Configurations;
 using DotNetEnv;
 using Serilog;
 
-Env.Load(options: LoadOptions.NoClobber());
+Env.Load(options: LoadOptions.TraversePath().NoClobber());
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
