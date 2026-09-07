@@ -17,6 +17,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConferenceRoomBooking.Dal.S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConferenceRoomBooking.LoadTesting", "ConferenceRoomBooking.LoadTesting\ConferenceRoomBooking.LoadTesting.csproj", "{059DAD72-A450-4A15-9C55-44C59D8BAD3B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConferenceRoomBooking.TelegramNotifier", "ConferenceRoomBooking.TelegramNotifier\ConferenceRoomBooking.TelegramNotifier.csproj", "{8293A85D-5772-416E-B50F-BB30FA43FE50}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConferenceRoomBooking.Utils", "ConferenceRoomBooking.Utils\ConferenceRoomBooking.Utils.csproj", "{25167222-4775-4773-8196-B390593144EF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -95,6 +99,30 @@ Global
 		{059DAD72-A450-4A15-9C55-44C59D8BAD3B}.Release|x64.Build.0 = Release|Any CPU
 		{059DAD72-A450-4A15-9C55-44C59D8BAD3B}.Release|x86.ActiveCfg = Release|Any CPU
 		{059DAD72-A450-4A15-9C55-44C59D8BAD3B}.Release|x86.Build.0 = Release|Any CPU
+		{8293A85D-5772-416E-B50F-BB30FA43FE50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8293A85D-5772-416E-B50F-BB30FA43FE50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8293A85D-5772-416E-B50F-BB30FA43FE50}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8293A85D-5772-416E-B50F-BB30FA43FE50}.Debug|x64.Build.0 = Debug|Any CPU
+		{8293A85D-5772-416E-B50F-BB30FA43FE50}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8293A85D-5772-416E-B50F-BB30FA43FE50}.Debug|x86.Build.0 = Debug|Any CPU
+		{8293A85D-5772-416E-B50F-BB30FA43FE50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8293A85D-5772-416E-B50F-BB30FA43FE50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8293A85D-5772-416E-B50F-BB30FA43FE50}.Release|x64.ActiveCfg = Release|Any CPU
+		{8293A85D-5772-416E-B50F-BB30FA43FE50}.Release|x64.Build.0 = Release|Any CPU
+		{8293A85D-5772-416E-B50F-BB30FA43FE50}.Release|x86.ActiveCfg = Release|Any CPU
+		{8293A85D-5772-416E-B50F-BB30FA43FE50}.Release|x86.Build.0 = Release|Any CPU
+		{25167222-4775-4773-8196-B390593144EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25167222-4775-4773-8196-B390593144EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25167222-4775-4773-8196-B390593144EF}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{25167222-4775-4773-8196-B390593144EF}.Debug|x64.Build.0 = Debug|Any CPU
+		{25167222-4775-4773-8196-B390593144EF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{25167222-4775-4773-8196-B390593144EF}.Debug|x86.Build.0 = Debug|Any CPU
+		{25167222-4775-4773-8196-B390593144EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25167222-4775-4773-8196-B390593144EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{25167222-4775-4773-8196-B390593144EF}.Release|x64.ActiveCfg = Release|Any CPU
+		{25167222-4775-4773-8196-B390593144EF}.Release|x64.Build.0 = Release|Any CPU
+		{25167222-4775-4773-8196-B390593144EF}.Release|x86.ActiveCfg = Release|Any CPU
+		{25167222-4775-4773-8196-B390593144EF}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
