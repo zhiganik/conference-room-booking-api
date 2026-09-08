@@ -30,6 +30,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAuthManager, AuthManager>();
         services.AddScoped<IAnalyticsManager, AnalyticsManager>();
         services.AddScoped<IBookingReportManager, BookingReportManager>();
+        services.AddScoped<IHourlyBookingReportPublisher, HourlyBookingReportPublisher>();
 
         return services;
     }

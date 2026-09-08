@@ -1,6 +1,4 @@
-using ConferenceRoomBooking.Bll.Common.Notifications;
 using ConferenceRoomBooking.Bll.Common.Reports;
-using ConferenceRoomBooking.Utils.Storage;
 using ConferenceRoomBooking.Web.Configurations;
 using Microsoft.Extensions.Options;
 
@@ -11,8 +9,6 @@ public class HourlyBookingReportBackgroundService(
     IOptions<HourlyBookingReportSettings> options,
     ILogger<HourlyBookingReportBackgroundService> logger) : BackgroundService
 {
-    private const string ContainerName = "hourly-booking-reports";
-
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var interval = TimeSpan.FromMinutes(options.Value.IntervalMinutes);
@@ -22,7 +18,13 @@ public class HourlyBookingReportBackgroundService(
         {
             try
             {
-                await GenerateAndPublishReportAsync(interval, stoppingToken);
+                using var scope = scopeFactory.CreateScope();
+                var publisher = scope.ServiceProvider.GetRequiredService<IHourlyBookingReportPublisher>();
+
+                var periodEndUtc = DateTime.UtcNow;
+                var periodStartUtc = periodEndUtc - interval;
+
+                await publisher.PublishAsync(periodStartUtc, periodEndUtc, stoppingToken);
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
@@ -33,30 +35,5 @@ public class HourlyBookingReportBackgroundService(
             }
         }
         while (await timer.WaitForNextTickAsync(stoppingToken));
-    }
-
-    private async Task GenerateAndPublishReportAsync(TimeSpan interval, CancellationToken cancellationToken)
-    {
-        using var scope = scopeFactory.CreateScope();
-        var services = scope.ServiceProvider;
-
-        var reportManager = services.GetRequiredService<IBookingReportManager>();
-        var blobStorageClient = services.GetRequiredService<IBlobStorageClient>();
-        var notifier = services.GetRequiredService<INotifier>();
-
-        var periodEndUtc = DateTime.UtcNow;
-        var periodStartUtc = periodEndUtc - interval;
-
-        var report = await reportManager.GenerateHourlyReportAsync(periodStartUtc, periodEndUtc, cancellationToken);
-
-        var blobName = $"{periodEndUtc:yyyy-MM-dd_HH-mm-ss}.json";
-        await blobStorageClient.EnsureContainerExistsAsync(ContainerName, cancellationToken);
-        await blobStorageClient.UploadJsonAsync(ContainerName, blobName, report, cancellationToken: cancellationToken);
-
-        var summary = $"Hourly booking report {periodStartUtc:HH:mm}-{periodEndUtc:HH:mm} UTC: " +
-                      $"{report.TotalBookings} booking(s), {report.TotalRevenue:C} total.";
-        await notifier.PushAsync(summary, cancellationToken);
-
-        logger.LogInformation("Published hourly booking report {BlobName}", blobName);
     }
 }
