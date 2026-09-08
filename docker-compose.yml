@@ -4,6 +4,8 @@ services:
     container_name: conferenceroombooking.web
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
+      TelegramNotifier__BaseUrl: "http://conferenceroombooking.telegramnotifier:8080"
+      Jwt__SigningKey: "${Jwt__SigningKey}"
     ports:
       - "5000:8080"
     build:

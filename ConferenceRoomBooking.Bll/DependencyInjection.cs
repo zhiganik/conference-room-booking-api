@@ -4,8 +4,10 @@ using ConferenceRoomBooking.Bll.Bookings;
 using ConferenceRoomBooking.Bll.Common.Analytics;
 using ConferenceRoomBooking.Bll.Common.Auth;
 using ConferenceRoomBooking.Bll.Common.Bookings;
+using ConferenceRoomBooking.Bll.Common.Reports;
 using ConferenceRoomBooking.Bll.Common.Rooms;
 using ConferenceRoomBooking.Bll.Common.ServiceOptions;
+using ConferenceRoomBooking.Bll.Reports;
 using ConferenceRoomBooking.Bll.Rooms;
 using ConferenceRoomBooking.Bll.ServiceOptions;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,6 +29,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBookingManager, BookingManager>();
         services.AddScoped<IAuthManager, AuthManager>();
         services.AddScoped<IAnalyticsManager, AnalyticsManager>();
+        services.AddScoped<IBookingReportManager, BookingReportManager>();
 
         return services;
     }

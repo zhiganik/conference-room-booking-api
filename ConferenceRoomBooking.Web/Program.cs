@@ -1,7 +1,10 @@
 using ConferenceRoomBooking.Dal.SqlRepositories.Migrations;
 using ConferenceRoomBooking.Web.Configurations;
 using ConferenceRoomBooking.Web.Startup;
+using DotNetEnv;
 using Serilog;
+
+Env.Load(options: LoadOptions.TraversePath().NoClobber());
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()

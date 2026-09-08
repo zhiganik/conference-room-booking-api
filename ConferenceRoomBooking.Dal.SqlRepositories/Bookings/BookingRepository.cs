@@ -83,6 +83,25 @@ public class BookingRepository(IDbConnectionFactory connectionFactory, IMapper m
         return entities.Select(mapper.Map<Booking>).ToList();
     }
 
+    public async Task<IReadOnlyList<Booking>> GetCreatedBetweenAsync(DateTime fromUtc, DateTime toUtc, CancellationToken cancellationToken)
+    {
+        await using var connection = (SqlConnection)connectionFactory.CreateConnection();
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command = new SqlCommand($"{DbSchema.Name}.sp_Bookings_GetCreatedBetween", connection)
+        {
+            CommandType = CommandType.StoredProcedure
+        };
+
+        command.Parameters.AddWithValue("@FromUtc", fromUtc);
+        command.Parameters.AddWithValue("@ToUtc", toUtc);
+
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        var entities = await ReadBookingsAsync(reader, cancellationToken);
+
+        return entities.Select(mapper.Map<Booking>).ToList();
+    }
+
     public async Task<bool> ExistsOverlappingAsync(Guid roomId, DateTime startTime, DateTime endTime, CancellationToken cancellationToken)
     {
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
