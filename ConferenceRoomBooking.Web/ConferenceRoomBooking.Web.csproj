@@ -13,6 +13,7 @@
         <ProjectReference Include="..\ConferenceRoomBooking.Bll\ConferenceRoomBooking.Bll.csproj" />
         <ProjectReference Include="..\ConferenceRoomBooking.Bll.Common\ConferenceRoomBooking.Bll.Common.csproj" />
         <ProjectReference Include="..\ConferenceRoomBooking.Dal.SqlRepositories\ConferenceRoomBooking.Dal.SqlRepositories.csproj" />
+        <ProjectReference Include="..\ConferenceRoomBooking.Dal.BlobsStorage\ConferenceRoomBooking.Dal.BlobsStorage.csproj" />
     </ItemGroup>
 
     <ItemGroup>

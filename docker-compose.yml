@@ -12,10 +12,6 @@ services:
     depends_on:
       - conferenceroombooking.telegramnotifier
 
-  # Internal-only microservice: broadcasts text messages to every Telegram chat that has
-  # messaged the bot, on behalf of conferenceroombooking.web. Deliberately has no "ports:"
-  # mapping, so it isn't reachable from the host — only from other containers on this
-  # compose network, by its service name (http://conferenceroombooking.telegramnotifier:8080).
   conferenceroombooking.telegramnotifier:
     image: conferenceroombooking.telegramnotifier
     container_name: conferenceroombooking.telegramnotifier

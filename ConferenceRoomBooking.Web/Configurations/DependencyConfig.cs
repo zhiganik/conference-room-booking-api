@@ -3,6 +3,7 @@ using ConferenceRoomBooking.Bll;
 using ConferenceRoomBooking.Bll.Common.Shared.Abstractions;
 using ConferenceRoomBooking.Bll.Common.Shared.Security;
 using ConferenceRoomBooking.Bll.Common.Shared.Settings;
+using ConferenceRoomBooking.Dal.BlobsStorage;
 using ConferenceRoomBooking.Dal.SqlRepositories;
 using ConferenceRoomBooking.Web.Middleware;
 using ConferenceRoomBooking.Web.Services;
@@ -33,6 +34,7 @@ public static class DependencyConfig
             .AddSwaggerDocs()
             .AddWebServices()
             .AddDalSqlRepositories()
+            .AddDalBlobsStorage(config)
             .AddBusinessLogic();
     }
 

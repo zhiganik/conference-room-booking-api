@@ -16,6 +16,8 @@ COPY ["ConferenceRoomBooking.Web/ConferenceRoomBooking.Web.csproj", "ConferenceR
 COPY ["ConferenceRoomBooking.Bll/ConferenceRoomBooking.Bll.csproj", "ConferenceRoomBooking.Bll/"]
 COPY ["ConferenceRoomBooking.Bll.Common/ConferenceRoomBooking.Bll.Common.csproj", "ConferenceRoomBooking.Bll.Common/"]
 COPY ["ConferenceRoomBooking.Dal.SqlRepositories/ConferenceRoomBooking.Dal.SqlRepositories.csproj", "ConferenceRoomBooking.Dal.SqlRepositories/"]
+COPY ["ConferenceRoomBooking.Dal.BlobsStorage/ConferenceRoomBooking.Dal.BlobsStorage.csproj", "ConferenceRoomBooking.Dal.BlobsStorage/"]
+COPY ["ConferenceRoomBooking.Utils/ConferenceRoomBooking.Utils.csproj", "ConferenceRoomBooking.Utils/"]
 RUN dotnet restore "./ConferenceRoomBooking.Web/ConferenceRoomBooking.Web.csproj"
 COPY . .
 WORKDIR "/src/ConferenceRoomBooking.Web"
