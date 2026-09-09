@@ -17,16 +17,17 @@ steps:
       packageType: 'sdk'
       version: '10.0.x'
 
-  - script: dotnet restore
-    displayName: 'Restore'
+  - script: dotnet restore ConferenceRoomBooking.sln
+    displayName: 'Restore solution'
 
-  - script: dotnet build --configuration $(buildConfiguration) --no-restore
-    displayName: 'Build'
+  - script: dotnet build ConferenceRoomBooking.sln --configuration $(buildConfiguration) --no-restore
+    displayName: 'Build solution'
 
-  - script: dotnet publish ConferenceRoomBooking.Web.csproj --configuration $(buildConfiguration) --no-build --output $(Build.ArtifactStagingDirectory)/publish
-    displayName: 'Publish'
+  - script: dotnet publish ConferenceRoomBooking.Web/ConferenceRoomBooking.Web.csproj --configuration $(buildConfiguration) --no-build --output $(Build.ArtifactStagingDirectory)/publish
+    displayName: 'Publish Web API'
 
   - task: ArchiveFiles@2
+    displayName: 'Zip files'
     inputs:
       rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/publish'
       includeRootFolder: false
@@ -35,12 +36,13 @@ steps:
       replaceExistingArchive: true
 
   - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact'
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/ConferenceRoomBooking.zip'
       ArtifactName: 'drop'
 
   - task: AzureWebApp@1
-    displayName: 'Deploy'
+    displayName: 'Deploy to Azure App Service'
     inputs:
       azureSubscription: '$(azureSubscription)'
       appType: 'webApp'
