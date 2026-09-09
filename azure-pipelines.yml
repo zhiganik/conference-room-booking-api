@@ -8,7 +8,7 @@ pool:
 
 variables:
   buildConfiguration: 'Release'
-  azureSubscription: 'AppServiceConnection'
+  azureSubscription: 'ZhehistovskyiAppConnection'
   webAppName: 'm-zhehistovskyi-web-app'
 
 steps:
