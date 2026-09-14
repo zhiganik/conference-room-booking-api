@@ -25,7 +25,6 @@ public static class DependencyConfig
                 new TelegramBotClient(new TelegramBotClientOptions(telegramSettings.BotToken), httpClient));
 
         services.AddScoped<INotifier, TelegramBroadcastNotifier>();
-        services.AddScoped<IWebhookSubscriptionHandler, TelegramWebhookSubscriptionHandler>();
 
         return services;
     }
