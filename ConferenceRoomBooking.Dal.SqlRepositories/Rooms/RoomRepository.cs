@@ -17,7 +17,7 @@ public class RoomRepository(IDbConnectionFactory connectionFactory, IMapper mapp
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand($"{DbSchema.Name}.sp_Rooms_Create", connection)
+        await using var command = new SqlCommand($"{DbSchema.Default}.sp_Rooms_Create", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
@@ -38,7 +38,7 @@ public class RoomRepository(IDbConnectionFactory connectionFactory, IMapper mapp
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand($"{DbSchema.Name}.sp_Rooms_GetById", connection)
+        await using var command = new SqlCommand($"{DbSchema.Default}.sp_Rooms_GetById", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
@@ -56,7 +56,7 @@ public class RoomRepository(IDbConnectionFactory connectionFactory, IMapper mapp
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand($"{DbSchema.Name}.sp_Rooms_GetByName", connection)
+        await using var command = new SqlCommand($"{DbSchema.Default}.sp_Rooms_GetByName", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
@@ -74,7 +74,7 @@ public class RoomRepository(IDbConnectionFactory connectionFactory, IMapper mapp
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand($"{DbSchema.Name}.sp_Rooms_Update", connection)
+        await using var command = new SqlCommand($"{DbSchema.Default}.sp_Rooms_Update", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
@@ -93,7 +93,7 @@ public class RoomRepository(IDbConnectionFactory connectionFactory, IMapper mapp
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand($"{DbSchema.Name}.sp_Rooms_SoftDelete", connection)
+        await using var command = new SqlCommand($"{DbSchema.Default}.sp_Rooms_SoftDelete", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
@@ -108,7 +108,7 @@ public class RoomRepository(IDbConnectionFactory connectionFactory, IMapper mapp
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand($"{DbSchema.Name}.sp_Rooms_SearchAvailable", connection)
+        await using var command = new SqlCommand($"{DbSchema.Default}.sp_Rooms_SearchAvailable", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
@@ -151,7 +151,7 @@ public class RoomRepository(IDbConnectionFactory connectionFactory, IMapper mapp
 
         var parameter = command.Parameters.AddWithValue("@ServiceOptionIds", table);
         parameter.SqlDbType = SqlDbType.Structured;
-        parameter.TypeName = $"{DbSchema.Name}.GuidIdList";
+        parameter.TypeName = $"{DbSchema.Default}.GuidIdList";
     }
 
     private static async Task<List<RoomEntity>> ReadRoomsAsync(SqlDataReader reader, CancellationToken cancellationToken)

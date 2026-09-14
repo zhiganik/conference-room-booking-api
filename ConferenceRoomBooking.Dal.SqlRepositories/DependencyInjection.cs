@@ -1,8 +1,10 @@
+using ConferenceRoomBooking.Bll.Common.AlertSubscribers;
 using ConferenceRoomBooking.Bll.Common.Analytics;
 using ConferenceRoomBooking.Bll.Common.Auth;
 using ConferenceRoomBooking.Bll.Common.Bookings;
 using ConferenceRoomBooking.Bll.Common.Rooms;
 using ConferenceRoomBooking.Bll.Common.ServiceOptions;
+using ConferenceRoomBooking.Dal.SqlRepositories.AlertSubscribers;
 using ConferenceRoomBooking.Dal.SqlRepositories.Analytics;
 using ConferenceRoomBooking.Dal.SqlRepositories.Auth;
 using ConferenceRoomBooking.Dal.SqlRepositories.Bookings;
@@ -13,7 +15,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ConferenceRoomBooking.Dal.SqlRepositories;
 
-/// <summary>Registers the SQL-backed data access layer: the connection factory and every repository.</summary>
 public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddDalSqlRepositories(this IServiceCollection services)
@@ -25,6 +26,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBookingRepository, BookingRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
+        services.AddScoped<IAlertSubscriberRepository, AlertSubscriberRepository>();
 
         return services;
     }

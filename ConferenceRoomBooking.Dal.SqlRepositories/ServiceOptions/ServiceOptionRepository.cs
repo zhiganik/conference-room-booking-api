@@ -16,7 +16,7 @@ public class ServiceOptionRepository(IDbConnectionFactory connectionFactory, IMa
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand($"{DbSchema.Name}.sp_ServiceOptions_Create", connection)
+        await using var command = new SqlCommand($"{DbSchema.Default}.sp_ServiceOptions_Create", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
@@ -35,7 +35,7 @@ public class ServiceOptionRepository(IDbConnectionFactory connectionFactory, IMa
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand($"{DbSchema.Name}.sp_ServiceOptions_GetById", connection)
+        await using var command = new SqlCommand($"{DbSchema.Default}.sp_ServiceOptions_GetById", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
@@ -57,7 +57,7 @@ public class ServiceOptionRepository(IDbConnectionFactory connectionFactory, IMa
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand($"{DbSchema.Name}.sp_ServiceOptions_GetByName", connection)
+        await using var command = new SqlCommand($"{DbSchema.Default}.sp_ServiceOptions_GetByName", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
@@ -79,14 +79,14 @@ public class ServiceOptionRepository(IDbConnectionFactory connectionFactory, IMa
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand($"{DbSchema.Name}.sp_ServiceOptions_GetByIds", connection)
+        await using var command = new SqlCommand($"{DbSchema.Default}.sp_ServiceOptions_GetByIds", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
 
         var idsParameter = command.Parameters.AddWithValue("@Ids", BuildGuidIdListTable(serviceOptionIds));
         idsParameter.SqlDbType = SqlDbType.Structured;
-        idsParameter.TypeName = $"{DbSchema.Name}.GuidIdList";
+        idsParameter.TypeName = $"{DbSchema.Default}.GuidIdList";
 
         var results = new List<ServiceOption>();
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
@@ -108,7 +108,7 @@ public class ServiceOptionRepository(IDbConnectionFactory connectionFactory, IMa
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand($"{DbSchema.Name}.sp_ServiceOptions_Update", connection)
+        await using var command = new SqlCommand($"{DbSchema.Default}.sp_ServiceOptions_Update", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
@@ -125,7 +125,7 @@ public class ServiceOptionRepository(IDbConnectionFactory connectionFactory, IMa
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand($"{DbSchema.Name}.sp_ServiceOptions_Delete", connection)
+        await using var command = new SqlCommand($"{DbSchema.Default}.sp_ServiceOptions_Delete", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
@@ -140,7 +140,7 @@ public class ServiceOptionRepository(IDbConnectionFactory connectionFactory, IMa
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand($"{DbSchema.Name}.sp_ServiceOptions_Search", connection)
+        await using var command = new SqlCommand($"{DbSchema.Default}.sp_ServiceOptions_Search", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
@@ -167,7 +167,7 @@ public class ServiceOptionRepository(IDbConnectionFactory connectionFactory, IMa
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand($"{DbSchema.Name}.sp_ServiceOptions_IsInUseByRoom", connection)
+        await using var command = new SqlCommand($"{DbSchema.Default}.sp_ServiceOptions_IsInUseByRoom", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
@@ -183,7 +183,7 @@ public class ServiceOptionRepository(IDbConnectionFactory connectionFactory, IMa
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand($"{DbSchema.Name}.sp_ServiceOptions_ExistsByName", connection)
+        await using var command = new SqlCommand($"{DbSchema.Default}.sp_ServiceOptions_ExistsByName", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
