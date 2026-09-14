@@ -4,5 +4,4 @@ namespace ConferenceRoomBooking.Dal.SqlRepositories.Shared;
 internal static class DbSchema
 {
     public const string Default = "MZhehistovskyi";
-    public const string Telegram = "NZTelegramNotifier";
 }

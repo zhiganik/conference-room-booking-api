@@ -13,7 +13,7 @@ public class AlertSubscriberRepository(IDbConnectionFactory connectionFactory) :
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand($"{DbSchema.Telegram}.sp_AlertSubscribers_Add", connection)
+        await using var command = new SqlCommand($"{DbSchema.Default}.sp_AlertSubscribers_Add", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
@@ -29,7 +29,7 @@ public class AlertSubscriberRepository(IDbConnectionFactory connectionFactory) :
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand($"{DbSchema.Telegram}.sp_AlertSubscribers_Remove", connection)
+        await using var command = new SqlCommand($"{DbSchema.Default}.sp_AlertSubscribers_Remove", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
@@ -44,7 +44,7 @@ public class AlertSubscriberRepository(IDbConnectionFactory connectionFactory) :
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand($"{DbSchema.Telegram}.sp_AlertSubscribers_GetAll", connection)
+        await using var command = new SqlCommand($"{DbSchema.Default}.sp_AlertSubscribers_GetAll", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
