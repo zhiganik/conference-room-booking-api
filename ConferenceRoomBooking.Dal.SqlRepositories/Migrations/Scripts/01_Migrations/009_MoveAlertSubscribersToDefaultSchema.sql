@@ -14,17 +14,6 @@ BEGIN
 END
 GO
 
-IF EXISTS (SELECT 1 FROM sys.tables WHERE name = N'AlertSubscribers' AND schema_id = SCHEMA_ID(N'NZTelegramNotifier'))
-BEGIN
-    INSERT INTO [MZhehistovskyi].[AlertSubscribers] ([ChatId], [CreatedAtUtc])
-    SELECT [old].[ChatId], [old].[CreatedAtUtc]
-    FROM [NZTelegramNotifier].[AlertSubscribers] AS [old]
-    WHERE NOT EXISTS (
-        SELECT 1 FROM [MZhehistovskyi].[AlertSubscribers] AS [new] WHERE [new].[ChatId] = [old].[ChatId]
-    );
-END
-GO
-
 IF EXISTS (SELECT 1 FROM sys.procedures WHERE name = N'sp_AlertSubscribers_Add' AND schema_id = SCHEMA_ID(N'NZTelegramNotifier'))
     DROP PROCEDURE [NZTelegramNotifier].[sp_AlertSubscribers_Add];
 GO
