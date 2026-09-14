@@ -19,8 +19,15 @@ public class WebhookFunction(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "webhook")] HttpRequest req,
         CancellationToken cancellationToken)
     {
-        var update = await JsonSerializer.DeserializeAsync<Update>(req.Body, JsonBotAPI.Options, cancellationToken);
+        using var reader = new StreamReader(req.Body);
+        var body = await reader.ReadToEndAsync(cancellationToken);
+        logger.LogInformation("Webhook payload received: {Body}", body);
+
+        var update = JsonSerializer.Deserialize<Update>(body, JsonBotAPI.Options);
         var chat = update?.Message?.Chat;
+
+        logger.LogInformation("Parsed update: UpdateId={UpdateId}, HasMessage={HasMessage}, ChatId={ChatId}",
+            update?.Id, update?.Message is not null, chat?.Id);
 
         if (chat is null)
             return new OkResult();
