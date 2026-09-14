@@ -5,6 +5,7 @@ using ConferenceRoomBooking.Bll.Common.Bookings.Exceptions;
 using ConferenceRoomBooking.Bll.Common.Bookings.Models;
 using ConferenceRoomBooking.Dal.SqlRepositories.Bookings.Entities;
 using ConferenceRoomBooking.Dal.SqlRepositories.Shared;
+using ConferenceRoomBooking.Utils.Sql;
 using Microsoft.Data.SqlClient;
 
 namespace ConferenceRoomBooking.Dal.SqlRepositories.Bookings;
@@ -75,6 +76,25 @@ public class BookingRepository(IDbConnectionFactory connectionFactory, IMapper m
         };
 
         command.Parameters.AddWithValue("@UserId", userId);
+
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        var entities = await ReadBookingsAsync(reader, cancellationToken);
+
+        return entities.Select(mapper.Map<Booking>).ToList();
+    }
+
+    public async Task<IReadOnlyList<Booking>> GetCreatedBetweenAsync(DateTime fromUtc, DateTime toUtc, CancellationToken cancellationToken)
+    {
+        await using var connection = (SqlConnection)connectionFactory.CreateConnection();
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command = new SqlCommand($"{DbSchema.Name}.sp_Bookings_GetCreatedBetween", connection)
+        {
+            CommandType = CommandType.StoredProcedure
+        };
+
+        command.Parameters.AddWithValue("@FromUtc", fromUtc);
+        command.Parameters.AddWithValue("@ToUtc", toUtc);
 
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         var entities = await ReadBookingsAsync(reader, cancellationToken);

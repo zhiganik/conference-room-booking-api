@@ -23,6 +23,12 @@ public interface IBookingRepository
     /// <returns>The user's bookings, most recent start time first.</returns>
     Task<IReadOnlyList<Booking>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken);
 
+    /// <summary>Retrieves every booking created within a time window, including their booked services.</summary>
+    /// <param name="fromUtc">Inclusive start of the <c>CreatedAtUtc</c> window.</param>
+    /// <param name="toUtc">Exclusive end of the <c>CreatedAtUtc</c> window.</param>
+    /// <returns>The matching bookings, ordered by creation time.</returns>
+    Task<IReadOnlyList<Booking>> GetCreatedBetweenAsync(DateTime fromUtc, DateTime toUtc, CancellationToken cancellationToken);
+
     /// <summary>Checks whether a room already has a booking overlapping the given window.</summary>
     /// <param name="roomId">The room to check.</param>
     /// <param name="startTime">Start of the window to check.</param>

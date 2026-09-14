@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ConferenceRoomBooking.Bll.Common\ConferenceRoomBooking.Bll.Common.csproj" />
+    <ProjectReference Include="..\ConferenceRoomBooking.Utils\ConferenceRoomBooking.Utils.csproj" />
   </ItemGroup>
 
   <ItemGroup>
