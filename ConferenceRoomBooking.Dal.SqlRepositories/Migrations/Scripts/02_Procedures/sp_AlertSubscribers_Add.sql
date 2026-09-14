@@ -1,12 +1,12 @@
-CREATE OR ALTER PROCEDURE [NZTelegramNotifier].[sp_AlertSubscribers_Add]
+CREATE OR ALTER PROCEDURE [MZhehistovskyi].[sp_AlertSubscribers_Add]
     @ChatId BIGINT
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    IF NOT EXISTS (SELECT 1 FROM [NZTelegramNotifier].[AlertSubscribers] WHERE [ChatId] = @ChatId)
+    IF NOT EXISTS (SELECT 1 FROM [MZhehistovskyi].[AlertSubscribers] WHERE [ChatId] = @ChatId)
     BEGIN
-        INSERT INTO [NZTelegramNotifier].[AlertSubscribers] ([ChatId]) VALUES (@ChatId);
+        INSERT INTO [MZhehistovskyi].[AlertSubscribers] ([ChatId]) VALUES (@ChatId);
         SELECT CAST(1 AS BIT) AS [Inserted];
     END
     ELSE
