@@ -14,20 +14,24 @@ public class HourlyBookingReportBackgroundService(
         var interval = TimeSpan.FromMinutes(options.Value.IntervalMinutes);
         using var timer = new PeriodicTimer(interval);
 
+        var periodStartUtc = DateTime.UtcNow - interval;
+
         do
         {
+            var periodEndUtc = DateTime.UtcNow;
+
             try
             {
                 using var scope = scopeFactory.CreateScope();
                 var publisher = scope.ServiceProvider.GetRequiredService<IHourlyBookingReportPublisher>();
 
-                var periodEndUtc = DateTime.UtcNow;
-                var periodStartUtc = periodEndUtc - interval;
-
                 await publisher.PublishAsync(periodStartUtc, periodEndUtc, stoppingToken);
+
+                periodStartUtc = periodEndUtc;
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
+                logger.LogInformation("Hourly booking report canceled due to application shutdown");
             }
             catch (Exception ex)
             {
