@@ -4,6 +4,7 @@ using ConferenceRoomBooking.Bll.Common.Auth;
 using ConferenceRoomBooking.Bll.Common.Auth.Models;
 using ConferenceRoomBooking.Dal.SqlRepositories.Auth.Entities;
 using ConferenceRoomBooking.Dal.SqlRepositories.Shared;
+using ConferenceRoomBooking.Utils.Sql;
 using Microsoft.Data.SqlClient;
 
 namespace ConferenceRoomBooking.Dal.SqlRepositories.Auth;
