@@ -1,6 +1,8 @@
+using ConferenceRoomBooking.Bll.AlertSubscribers;
 using ConferenceRoomBooking.Bll.Analytics;
 using ConferenceRoomBooking.Bll.Auth;
 using ConferenceRoomBooking.Bll.Bookings;
+using ConferenceRoomBooking.Bll.Common.AlertSubscribers;
 using ConferenceRoomBooking.Bll.Common.Analytics;
 using ConferenceRoomBooking.Bll.Common.Auth;
 using ConferenceRoomBooking.Bll.Common.Bookings;
@@ -14,7 +16,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ConferenceRoomBooking.Bll;
 
-/// <summary>Registers the business logic layer: domain services and every manager.</summary>
 public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddBusinessLogic(this IServiceCollection services)
@@ -29,8 +30,14 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBookingManager, BookingManager>();
         services.AddScoped<IAuthManager, AuthManager>();
         services.AddScoped<IAnalyticsManager, AnalyticsManager>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddNotificationsBusinessLogic(this IServiceCollection services)
+    {
         services.AddScoped<IBookingReportManager, BookingReportManager>();
-        services.AddScoped<IHourlyBookingReportPublisher, HourlyBookingReportPublisher>();
+        services.AddScoped<IAlertSubscriberManager, AlertSubscriberManager>();
 
         return services;
     }

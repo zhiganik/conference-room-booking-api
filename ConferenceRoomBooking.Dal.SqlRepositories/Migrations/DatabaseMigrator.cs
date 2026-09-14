@@ -7,5 +7,5 @@ namespace ConferenceRoomBooking.Dal.SqlRepositories.Migrations;
 public static class DatabaseMigrator
 {
     public static void Migrate(IConfiguration configuration) =>
-        UtilsMigrator.Migrate(configuration, DbSchema.Name, typeof(DbSchema).Assembly);
+        UtilsMigrator.Migrate(configuration, DbSchema.Default, typeof(DbSchema).Assembly);
 }
