@@ -26,7 +26,6 @@ public static class DependencyConfig
 
         services.AddScoped<INotifier, TelegramBroadcastNotifier>();
         services.AddScoped<IWebhookSubscriptionHandler, TelegramWebhookSubscriptionHandler>();
-        services.AddScoped<IWebhookRegistrar, TelegramWebhookRegistrar>();
 
         return services;
     }
