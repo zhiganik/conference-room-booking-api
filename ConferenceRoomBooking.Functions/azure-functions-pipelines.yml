@@ -2,6 +2,9 @@ trigger:
   branches:
     include:
       - main
+  paths:
+    include:
+      - ConferenceRoomBooking.Functions/*
 
 pool:
   vmImage: 'windows-latest'
