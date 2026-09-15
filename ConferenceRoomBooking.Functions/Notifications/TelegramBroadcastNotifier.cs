@@ -4,6 +4,7 @@ using ConferenceRoomBooking.Bll.Common.Notifications;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
+using Telegram.Bot.Types.Enums;
 
 namespace ConferenceRoomBooking.Functions.Notifications;
 
@@ -23,7 +24,7 @@ public class TelegramBroadcastNotifier(
     {
         try
         {
-            await botClient.SendMessage(chatId, message, cancellationToken: cancellationToken);
+            await botClient.SendMessage(chatId, message, parseMode: ParseMode.Html, cancellationToken: cancellationToken);
         }
         catch (ApiRequestException ex) when (ex.ErrorCode == (int)HttpStatusCode.Forbidden || IsChatNotFound(ex))
         {

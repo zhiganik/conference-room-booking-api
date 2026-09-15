@@ -1,5 +1,7 @@
 using ConferenceRoomBooking.Bll.Common.Notifications;
+using ConferenceRoomBooking.Bll.Common.Shared.Abstractions;
 using ConferenceRoomBooking.Functions.Notifications;
+using ConferenceRoomBooking.Functions.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot;
@@ -8,6 +10,12 @@ namespace ConferenceRoomBooking.Functions.Configurations;
 
 public static class DependencyConfig
 {
+    public static IServiceCollection AddFunctionsUserContext(this IServiceCollection services)
+    {
+        services.AddScoped<IUserContext, SystemUserContext>();
+        return services;
+    }
+
     public static IServiceCollection AddTelegramChannel(this IServiceCollection services, IConfiguration config)
     {
         services.Configure<TelegramSettings>(config.GetSection(TelegramSettings.SectionName));
