@@ -15,6 +15,7 @@ var builder = FunctionsApplication.CreateBuilder(args);
 builder.ConfigureFunctionsWebApplication();
 
 builder.Services
+    .AddAutoMapper(cfg => { }, typeof(ConferenceRoomBooking.Dal.SqlRepositories.Mapping.AutomapperConfig).Assembly)
     .AddDalSqlRepositories()
     .AddDalBlobsStorage(builder.Configuration)
     .AddBusinessLogic()
