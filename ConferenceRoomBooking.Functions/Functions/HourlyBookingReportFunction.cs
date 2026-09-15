@@ -15,10 +15,10 @@ public class HourlyBookingReportFunction(
     private const string ContainerName = "hourly-booking-reports";
 
     [Function("HourlyBookingReportFunction")]
-    public async Task Run([TimerTrigger("0 0 * * * *")] TimerInfo timer, CancellationToken cancellationToken)
+    public async Task Run([TimerTrigger("0 0 9 * * *")] TimerInfo timer, CancellationToken cancellationToken)
     {
         var periodEndUtc = DateTime.UtcNow;
-        var periodStartUtc = timer.ScheduleStatus?.Last ?? periodEndUtc.AddHours(-1);
+        var periodStartUtc = timer.ScheduleStatus?.Last ?? periodEndUtc.AddDays(-1);
 
         try
         {
