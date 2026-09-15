@@ -1,3 +1,4 @@
+using System.Net;
 using ConferenceRoomBooking.Bll.Common.Notifications;
 using ConferenceRoomBooking.Bll.Common.Reports;
 using ConferenceRoomBooking.Utils.Storage;
@@ -14,11 +15,19 @@ public class HourlyBookingReportFunction(
 {
     private const string ContainerName = "hourly-booking-reports";
 
+    private static readonly TimeSpan ReportWindow = TimeSpan.FromDays(1);
+
     [Function("HourlyBookingReportFunction")]
     public async Task Run([TimerTrigger("0 0 9 * * *")] TimerInfo timer, CancellationToken cancellationToken)
     {
         var periodEndUtc = DateTime.UtcNow;
-        var periodStartUtc = timer.ScheduleStatus?.Last ?? periodEndUtc.AddDays(-1);
+        var lastRun = timer.ScheduleStatus?.Last;
+        var isValidLastRun = lastRun.HasValue && lastRun.Value < periodEndUtc && periodEndUtc - lastRun.Value <= ReportWindow;
+        var periodStartUtc = isValidLastRun ? lastRun!.Value : periodEndUtc - ReportWindow;
+
+        logger.LogInformation(
+            "Hourly booking report period: {PeriodStartUtc:O} - {PeriodEndUtc:O} (ScheduleStatus.Last: {ScheduleLast:O})",
+            periodStartUtc, periodEndUtc, timer.ScheduleStatus?.Last);
 
         try
         {
@@ -31,8 +40,9 @@ public class HourlyBookingReportFunction(
             var reportUrl = await blobStorageClient.GetTemporaryReadUrlAsync(
                 ContainerName, blobName, TimeSpan.FromHours(3), cancellationToken);
 
-            var summary = $"Hourly booking report {periodStartUtc:HH:mm}-{periodEndUtc:HH:mm} UTC: " +
-                          $"{report.TotalBookings} booking(s), {report.TotalRevenue:C} total.\n{reportUrl}";
+            var summary = $"Hourly booking report {periodStartUtc:dd.MM.yyyy HH:mm}-{periodEndUtc:dd.MM.yyyy HH:mm} UTC: " +
+                          $"{report.TotalBookings} booking(s), {report.TotalRevenue:C} total.\n" +
+                          $"<a href=\"{WebUtility.HtmlEncode(reportUrl.ToString())}\">Report</a>";
             await notifier.PushAsync(summary, cancellationToken);
         }
         catch (Exception ex)
