@@ -16,7 +16,7 @@ public class UserRepository(IDbConnectionFactory connectionFactory, IMapper mapp
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand($"{DbSchema.Name}.sp_Users_Create", connection)
+        await using var command = new SqlCommand($"{DbSchema.Default}.sp_Users_Create", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
@@ -37,7 +37,7 @@ public class UserRepository(IDbConnectionFactory connectionFactory, IMapper mapp
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand($"{DbSchema.Name}.sp_Users_GetByEmail", connection)
+        await using var command = new SqlCommand($"{DbSchema.Default}.sp_Users_GetByEmail", connection)
         {
             CommandType = CommandType.StoredProcedure
         };

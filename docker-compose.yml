@@ -4,22 +4,9 @@ services:
     container_name: conferenceroombooking.web
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
-      TelegramNotifier__BaseUrl: "http://conferenceroombooking.telegramnotifier:8080"
       Jwt__SigningKey: "${Jwt__SigningKey}"
     ports:
       - "5000:8080"
     build:
       context: .
       dockerfile: ConferenceRoomBooking.Web/Dockerfile
-    depends_on:
-      - conferenceroombooking.telegramnotifier
-
-  conferenceroombooking.telegramnotifier:
-    image: conferenceroombooking.telegramnotifier
-    container_name: conferenceroombooking.telegramnotifier
-    environment:
-      ASPNETCORE_ENVIRONMENT: "Development"
-      Telegram__BotToken: "${Telegram__BotToken}"
-    build:
-      context: .
-      dockerfile: ConferenceRoomBooking.TelegramNotifier/Dockerfile
