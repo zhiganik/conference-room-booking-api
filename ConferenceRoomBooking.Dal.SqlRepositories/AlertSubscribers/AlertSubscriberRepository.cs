@@ -11,52 +11,49 @@ public class AlertSubscriberRepository(IDbConnectionFactory connectionFactory) :
     public async Task<bool> AddAsync(long chatId, CancellationToken cancellationToken)
     {
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
-        await connection.OpenAsync(cancellationToken);
+        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
         await using var command = new SqlCommand($"{DbSchema.Default}.sp_AlertSubscribers_Add", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
+        command.Parameters.Add(new SqlParameter("@ChatId", SqlDbType.BigInt) { Value = chatId });
 
-        command.Parameters.AddWithValue("@ChatId", chatId);
-
-        var inserted = await command.ExecuteScalarAsync(cancellationToken);
+        var inserted = await command.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
         return inserted is true;
     }
 
     public async Task RemoveAsync(long chatId, CancellationToken cancellationToken)
     {
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
-        await connection.OpenAsync(cancellationToken);
+        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
         await using var command = new SqlCommand($"{DbSchema.Default}.sp_AlertSubscribers_Remove", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
+        command.Parameters.Add(new SqlParameter("@ChatId", SqlDbType.BigInt) { Value = chatId });
 
-        command.Parameters.AddWithValue("@ChatId", chatId);
-
-        await command.ExecuteNonQueryAsync(cancellationToken);
+        await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<IReadOnlyList<long>> GetAllAsync(CancellationToken cancellationToken)
     {
         await using var connection = (SqlConnection)connectionFactory.CreateConnection();
-        await connection.OpenAsync(cancellationToken);
+        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
         await using var command = new SqlCommand($"{DbSchema.Default}.sp_AlertSubscribers_GetAll", connection)
         {
             CommandType = CommandType.StoredProcedure
         };
 
-        var results = new List<long>();
-        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        List<long> results = [];
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+        var chatIdOrdinal = reader.GetOrdinal("ChatId");
 
-        var chatIdOrd = reader.GetOrdinal("ChatId");
-
-        while (await reader.ReadAsync(cancellationToken))
+        while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
         {
-            results.Add(reader.GetInt64(chatIdOrd));
+            results.Add(reader.GetInt64(chatIdOrdinal));
         }
 
         return results;

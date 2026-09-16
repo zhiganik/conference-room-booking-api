@@ -10,6 +10,9 @@ variables:
   buildConfiguration: 'Release'
   azureSubscription: 'ZhehistovskyiAppConnection'
   functionAppName: 'm-zhehistovskyi-functions-app'
+  # Flex Consumption assigns a random-suffixed default hostname, not <functionAppName>.azurewebsites.net.
+  # Update this if the Function App is ever deleted and recreated.
+  functionAppHostName: 'm-zhehistovskyi-functions-app-e5h2ayashjdqbvac.westeurope-01.azurewebsites.net'
 
 steps:
   - task: UseDotNet@2
@@ -49,3 +52,22 @@ steps:
       appName: '$(functionAppName)'
       package: '$(Build.ArtifactStagingDirectory)/ConferenceRoomBooking.Functions.zip'
       deploymentMethod: 'auto'
+
+  - task: PowerShell@2
+    displayName: 'Register Telegram webhook'
+    inputs:
+      targetType: 'inline'
+      script: |
+        $webhookUrl = "https://$(functionAppHostName)/api/webhook"
+        $body = @{ url = $webhookUrl; secret_token = "$(TelegramWebhookSecret)" } | ConvertTo-Json
+        $response = Invoke-RestMethod -Method Post `
+          -Uri "https://api.telegram.org/bot$(TelegramBotToken)/setWebhook" `
+          -ContentType 'application/json' `
+          -Body $body
+
+        if (-not $response.ok) {
+          Write-Error "Telegram setWebhook failed: $($response.description)"
+          exit 1
+        }
+
+        Write-Host "Telegram webhook registered at $webhookUrl"
