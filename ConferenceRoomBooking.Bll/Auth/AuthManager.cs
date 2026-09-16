@@ -2,16 +2,22 @@ using ConferenceRoomBooking.Bll.Common.Auth;
 using ConferenceRoomBooking.Bll.Common.Auth.Models;
 using ConferenceRoomBooking.Bll.Common.Shared.Exceptions;
 using ConferenceRoomBooking.Bll.Common.Shared.Security;
+using Microsoft.Extensions.Logging;
 
 namespace ConferenceRoomBooking.Bll.Auth;
 
-public class AuthManager(IUserRepository userRepository, IJwtIssuer jwtIssuer, IPasswordHasher passwordHasher) : IAuthManager
+public class AuthManager(
+    IUserRepository userRepository,
+    IJwtIssuer jwtIssuer,
+    IPasswordHasher passwordHasher,
+    ILogger<AuthManager> logger) : IAuthManager
 {
     public async Task<AuthResult> RegisterAsync(string email, string password, CancellationToken cancellationToken)
     {
         var existing = await userRepository.GetByEmailAsync(email, cancellationToken);
         if (existing is not null)
         {
+            logger.LogWarning("Registration rejected for {Email}: email already registered.", email);
             throw new ConflictException($"Email '{email}' is already registered.");
         }
 
@@ -24,6 +30,8 @@ public class AuthManager(IUserRepository userRepository, IJwtIssuer jwtIssuer, I
         };
 
         var created = await userRepository.CreateAsync(user, cancellationToken);
+
+        logger.LogInformation("User {UserId} registered with email {Email}.", created.Id, created.Email);
         return BuildAuthResult(created);
     }
 
@@ -32,9 +40,11 @@ public class AuthManager(IUserRepository userRepository, IJwtIssuer jwtIssuer, I
         var user = await userRepository.GetByEmailAsync(email, cancellationToken);
         if (user is null || !passwordHasher.VerifyPassword(password, user.PasswordHash))
         {
+            logger.LogWarning("Login failed for {Email}: invalid credentials.", email);
             throw new UnauthorizedException("Invalid email or password.");
         }
 
+        logger.LogInformation("User {UserId} logged in.", user.Id);
         return BuildAuthResult(user);
     }
 
