@@ -1,8 +1,12 @@
+using ConferenceRoomBooking.LoadTesting.Auth;
+
 namespace ConferenceRoomBooking.LoadTesting.Scenarios;
 
 public interface IRequestScenario
 {
     string Name { get; }
 
-    Task<HttpResponseMessage> ExecuteAsync(HttpClient httpClient, int requestIndex);
+    Actor Actor { get; }
+
+    Task<HttpResponseMessage> ExecuteAsync(HttpClient httpClient, AuthContext authContext, int requestIndex);
 }

@@ -1,8 +1,7 @@
-namespace ConferenceRoomBooking.LoadTesting;
+namespace ConferenceRoomBooking.LoadTesting.Reporting;
 
 public sealed record RequestStatistics(
     int TotalRequests,
-    int Parallelism,
     TimeSpan TotalTime,
     int SuccessCount,
     int FailureCount,
@@ -11,7 +10,7 @@ public sealed record RequestStatistics(
     double MaxMs,
     double AverageConcurrency)
 {
-    public static RequestStatistics Compute(RequestResult[] results, TimeSpan totalTime, int parallelism)
+    public static RequestStatistics Compute(IReadOnlyCollection<RequestResult> results, TimeSpan totalTime)
     {
         var elapsedMs = results.Select(r => r.ElapsedMs).ToArray();
         var successCount = results.Count(r => r.Success);
@@ -19,11 +18,10 @@ public sealed record RequestStatistics(
         var averageConcurrency = elapsedMs.Sum() / totalTime.TotalMilliseconds;
 
         return new RequestStatistics(
-            TotalRequests: results.Length,
-            Parallelism: parallelism,
+            TotalRequests: results.Count,
             TotalTime: totalTime,
             SuccessCount: successCount,
-            FailureCount: results.Length - successCount,
+            FailureCount: results.Count - successCount,
             AverageMs: elapsedMs.Average(),
             MinMs: elapsedMs.Min(),
             MaxMs: elapsedMs.Max(),

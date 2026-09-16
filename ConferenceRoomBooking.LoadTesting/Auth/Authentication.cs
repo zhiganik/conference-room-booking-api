@@ -1,7 +1,7 @@
 using System.Text;
 using System.Text.Json;
 
-namespace ConferenceRoomBooking.LoadTesting;
+namespace ConferenceRoomBooking.LoadTesting.Auth;
 
 public sealed class Authentication(HttpClient httpClient)
 {
