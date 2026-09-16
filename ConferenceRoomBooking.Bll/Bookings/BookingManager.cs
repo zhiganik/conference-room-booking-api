@@ -6,6 +6,7 @@ using ConferenceRoomBooking.Bll.Common.ServiceOptions;
 using ConferenceRoomBooking.Bll.Common.ServiceOptions.Models;
 using ConferenceRoomBooking.Bll.Common.Shared.Abstractions;
 using ConferenceRoomBooking.Bll.Common.Shared.Exceptions;
+using Microsoft.Extensions.Logging;
 
 namespace ConferenceRoomBooking.Bll.Bookings;
 
@@ -15,7 +16,8 @@ public class BookingManager(
     IServiceOptionRepository serviceOptionRepository,
     IRentalPriceCalculator priceCalculator,
     IUserContext userContext,
-    IRoomBookingLock roomBookingLock) : IBookingManager
+    IRoomBookingLock roomBookingLock,
+    ILogger<BookingManager> logger) : IBookingManager
 {
     public async Task<Booking> CreateAsync(Guid roomId, DateTime startTime, int durationMinutes, List<Guid>? serviceOptionIds, CancellationToken cancellationToken)
     {
@@ -32,6 +34,9 @@ public class BookingManager(
         var unavailableIds = ids.Except(room.Services.Select(s => s.Id));
         if (unavailableIds.Count() > 0)
         {
+            logger.LogWarning(
+                "Booking rejected for room {RoomId} by user {UserId}: service option(s) {ServiceOptionIds} not offered.",
+                roomId, currentUserId, unavailableIds);
             throw new ConflictException(
                 $"Service option(s) {string.Join(", ", unavailableIds)} are not offered by room '{room.Name}'.");
         }
@@ -60,6 +65,10 @@ public class BookingManager(
 
             bookingId = await bookingRepository.CreateAsync(booking, cancellationToken);
         }
+
+        logger.LogInformation(
+            "Booking {BookingId} created for room {RoomId} by user {UserId}: {StartTime:o} - {EndTime:o}, total {TotalPrice}.",
+            bookingId, roomId, currentUserId, startTime, endTime, priceBreakdown.TotalPrice);
 
         return await bookingRepository.GetByIdAsync(bookingId, cancellationToken)
             ?? throw new NotFoundException(nameof(Booking), bookingId);

@@ -1,4 +1,7 @@
-﻿namespace ConferenceRoomBooking.Web.Configurations;
+﻿using System.Diagnostics;
+using System.IdentityModel.Tokens.Jwt;
+
+namespace ConferenceRoomBooking.Web.Configurations;
 
 public static class ApplicationConfig
 {
@@ -16,8 +19,21 @@ public static class ApplicationConfig
         {
             app.UseHttpsRedirection();
         }
-        
+
         app.UseAuthentication();
+
+        app.Use(async (context, next) =>
+        {
+            var userId = context.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                Activity.Current?.SetTag("enduser.id", userId);
+            }
+
+            await next(context);
+        });
+
         app.UseAuthorization();
         app.MapControllers();
 
