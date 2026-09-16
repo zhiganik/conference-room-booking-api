@@ -1,0 +1,73 @@
+trigger:
+  paths:
+    include:
+      - ConferenceRoomBooking.Functions/*
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  buildConfiguration: 'Release'
+  azureSubscription: 'ZhehistovskyiAppConnection'
+  functionAppName: 'm-zhehistovskyi-functions-app'
+  # Flex Consumption assigns a random-suffixed default hostname, not <functionAppName>.azurewebsites.net.
+  # Update this if the Function App is ever deleted and recreated.
+  functionAppHostName: 'm-zhehistovskyi-functions-app-e5h2ayashjdqbvac.westeurope-01.azurewebsites.net'
+
+steps:
+  - task: UseDotNet@2
+    inputs:
+      packageType: 'sdk'
+      version: '10.0.x'
+
+  - script: dotnet restore ConferenceRoomBooking.sln
+    displayName: 'Restore solution'
+
+  - script: dotnet build ConferenceRoomBooking.sln --configuration $(buildConfiguration) --no-restore
+    displayName: 'Build solution'
+
+  - script: dotnet publish ConferenceRoomBooking.Functions/ConferenceRoomBooking.Functions.csproj --configuration $(buildConfiguration) --no-build --output $(Build.ArtifactStagingDirectory)/publish
+    displayName: 'Publish Functions App'
+
+  - task: ArchiveFiles@2
+    displayName: 'Zip files'
+    inputs:
+      rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/publish'
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/ConferenceRoomBooking.Functions.zip'
+      replaceExistingArchive: true
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/ConferenceRoomBooking.Functions.zip'
+      ArtifactName: 'drop'
+
+  - task: AzureFunctionApp@2
+    displayName: 'Deploy to Azure Function App'
+    inputs:
+      azureSubscription: '$(azureSubscription)'
+      appType: 'functionApp'
+      appName: '$(functionAppName)'
+      package: '$(Build.ArtifactStagingDirectory)/ConferenceRoomBooking.Functions.zip'
+      deploymentMethod: 'auto'
+
+  - task: PowerShell@2
+    displayName: 'Register Telegram webhook'
+    inputs:
+      targetType: 'inline'
+      script: |
+        $webhookUrl = "https://$(functionAppHostName)/api/webhook"
+        $body = @{ url = $webhookUrl; secret_token = "$(TelegramWebhookSecret)" } | ConvertTo-Json
+        $response = Invoke-RestMethod -Method Post `
+          -Uri "https://api.telegram.org/bot$(TelegramBotToken)/setWebhook" `
+          -ContentType 'application/json' `
+          -Body $body
+
+        if (-not $response.ok) {
+          Write-Error "Telegram setWebhook failed: $($response.description)"
+          exit 1
+        }
+
+        Write-Host "Telegram webhook registered at $webhookUrl"

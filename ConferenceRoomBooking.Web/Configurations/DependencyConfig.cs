@@ -1,19 +1,14 @@
 using System.Text;
 using ConferenceRoomBooking.Bll;
-using ConferenceRoomBooking.Bll.Common.Notifications;
 using ConferenceRoomBooking.Bll.Common.Shared.Abstractions;
 using ConferenceRoomBooking.Bll.Common.Shared.Security;
 using ConferenceRoomBooking.Bll.Common.Shared.Settings;
-using ConferenceRoomBooking.Dal.BlobsStorage;
 using ConferenceRoomBooking.Dal.SqlRepositories;
-using ConferenceRoomBooking.Web.BackgroundServices;
 using ConferenceRoomBooking.Web.Middleware;
-using ConferenceRoomBooking.Web.Notifications;
 using ConferenceRoomBooking.Web.Services;
 using ConferenceRoomBooking.Web.Swagger;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
@@ -38,10 +33,7 @@ public static class DependencyConfig
             .AddSwaggerDocs()
             .AddWebServices()
             .AddDalSqlRepositories()
-            .AddDalBlobsStorage(config)
-            .AddBusinessLogic()
-            .AddTelegramNotifierClient(config)
-            .AddHourlyBookingReporting(config);
+            .AddBusinessLogic();
     }
 
     private static IServiceCollection AddExceptionHandler(this IServiceCollection services)
@@ -69,27 +61,6 @@ public static class DependencyConfig
     private static IServiceCollection AddWebServices(this IServiceCollection services)
     {
         services.AddScoped<IUserContext, UserContext>();
-        return services;
-    }
-
-    private static IServiceCollection AddTelegramNotifierClient(this IServiceCollection services, IConfiguration config)
-    {
-        services.Configure<TelegramNotifierSettings>(config.GetSection(TelegramNotifierSettings.SectionName));
-
-        services.AddHttpClient<INotifier, HttpTelegramNotifier>((sp, client) =>
-        {
-            var settings = sp.GetRequiredService<IOptions<TelegramNotifierSettings>>().Value;
-            client.BaseAddress = new Uri(settings.BaseUrl);
-        });
-
-        return services;
-    }
-
-    private static IServiceCollection AddHourlyBookingReporting(this IServiceCollection services, IConfiguration config)
-    {
-        services.Configure<HourlyBookingReportSettings>(config.GetSection(HourlyBookingReportSettings.SectionName));
-        services.AddHostedService<HourlyBookingReportBackgroundService>();
-
         return services;
     }
 
