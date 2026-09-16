@@ -49,7 +49,7 @@ Admins/managers also need day-to-day business reports — see
 - **AutoMapper** (Entity ↔ Model in the data layer, Model ↔ Dto in the
   web layer)
 - **FluentValidation** (with automatic MVC validation)
-- **Serilog** (console sink)
+- **Application Insights** (telemetry + `ILogger` integration)
 - **Swashbuckle / Swagger** (with a JWT-aware "Authorize" button)
 - **Docker** / Docker Compose for containerized runs
 

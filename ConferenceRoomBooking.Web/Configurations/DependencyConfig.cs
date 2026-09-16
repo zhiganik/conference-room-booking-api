@@ -28,6 +28,7 @@ public static class DependencyConfig
         services.AddControllers();
 
         return services
+            .AddApplicationInsights(config)
             .AddExceptionHandler()
             .AddAutoMapperProfiles()
             .AddValidation()
@@ -42,6 +43,16 @@ public static class DependencyConfig
             .AddBusinessLogic()
             .AddTelegramNotifierClient(config)
             .AddHourlyBookingReporting(config);
+    }
+
+    private static IServiceCollection AddApplicationInsights(this IServiceCollection services, IConfiguration config)
+    {
+        var hasConnectionString = !string.IsNullOrWhiteSpace(config["ApplicationInsights:ConnectionString"])
+            || !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING"));
+
+        return hasConnectionString
+            ? services.AddApplicationInsightsTelemetry(config)
+            : services;
     }
 
     private static IServiceCollection AddExceptionHandler(this IServiceCollection services)
