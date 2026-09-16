@@ -17,8 +17,7 @@ public class AuthManager(
         var existing = await userRepository.GetByEmailAsync(email, cancellationToken);
         if (existing is not null)
         {
-            logger.LogWarning("Registration rejected for {Email}: email already registered.", email);
-            throw new ConflictException($"Email '{email}' is already registered.");
+            throw new ConflictException("Email '{Email}' is already registered.", email);
         }
 
         var user = new User
@@ -40,8 +39,7 @@ public class AuthManager(
         var user = await userRepository.GetByEmailAsync(email, cancellationToken);
         if (user is null || !passwordHasher.VerifyPassword(password, user.PasswordHash))
         {
-            logger.LogWarning("Login failed for {Email}: invalid credentials.", email);
-            throw new UnauthorizedException("Invalid email or password.");
+            throw new UnauthorizedException("Login failed for '{Email}': invalid email or password.", email);
         }
 
         logger.LogInformation("User {UserId} logged in.", user.Id);

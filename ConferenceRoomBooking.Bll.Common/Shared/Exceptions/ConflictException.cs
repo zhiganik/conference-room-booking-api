@@ -5,5 +5,6 @@ namespace ConferenceRoomBooking.Bll.Common.Shared.Exceptions;
 /// uniqueness is required, or an attempt to delete something still referenced elsewhere. Mapped to
 /// HTTP 409 Conflict.
 /// </summary>
-/// <param name="message">Client-safe explanation of the conflict.</param>
-public class ConflictException(string message) : AppException(message);
+/// <param name="template">Client-safe message template, e.g. "Room '{RoomName}' is already booked."</param>
+/// <param name="args">Values substituted into <paramref name="template"/>'s placeholders, in order.</param>
+public class ConflictException(string template, params object?[] args) : AppException(template, args);

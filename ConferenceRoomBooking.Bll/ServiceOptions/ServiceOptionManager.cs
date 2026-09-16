@@ -1,10 +1,13 @@
 using ConferenceRoomBooking.Bll.Common.ServiceOptions;
 using ConferenceRoomBooking.Bll.Common.ServiceOptions.Models;
 using ConferenceRoomBooking.Bll.Common.Shared.Exceptions;
+using Microsoft.Extensions.Logging;
 
 namespace ConferenceRoomBooking.Bll.ServiceOptions;
 
-public class ServiceOptionManager(IServiceOptionRepository serviceOptionRepository) : IServiceOptionManager
+public class ServiceOptionManager(
+    IServiceOptionRepository serviceOptionRepository,
+    ILogger<ServiceOptionManager> logger) : IServiceOptionManager
 {
     public async Task<ServiceOption> CreateAsync(string name, decimal price, CancellationToken cancellationToken)
     {
@@ -16,7 +19,9 @@ public class ServiceOptionManager(IServiceOptionRepository serviceOptionReposito
             Price = price
         };
 
-        return await serviceOptionRepository.CreateAsync(serviceOption, cancellationToken);
+        var created = await serviceOptionRepository.CreateAsync(serviceOption, cancellationToken);
+        logger.LogInformation("Service option {ServiceOptionId} '{Name}' created.", created.Id, created.Name);
+        return created;
     }
 
     public async Task<ServiceOption> GetByIdAsync(Guid serviceOptionId, CancellationToken cancellationToken) =>
@@ -34,6 +39,7 @@ public class ServiceOptionManager(IServiceOptionRepository serviceOptionReposito
         serviceOption.Price = price;
 
         await serviceOptionRepository.UpdateAsync(serviceOption, cancellationToken);
+        logger.LogInformation("Service option {ServiceOptionId} updated.", serviceOptionId);
 
         return serviceOption;
     }
@@ -46,10 +52,12 @@ public class ServiceOptionManager(IServiceOptionRepository serviceOptionReposito
         if (await serviceOptionRepository.IsInUseByRoomAsync(serviceOptionId, cancellationToken))
         {
             throw new ConflictException(
-                $"ServiceOption '{serviceOption.Name}' is linked to one or more rooms and cannot be deleted.");
+                "ServiceOption '{Name}' ({ServiceOptionId}) is linked to one or more rooms and cannot be deleted.",
+                serviceOption.Name, serviceOptionId);
         }
 
         await serviceOptionRepository.DeleteAsync(serviceOptionId, cancellationToken);
+        logger.LogInformation("Service option {ServiceOptionId} '{Name}' deleted.", serviceOptionId, serviceOption.Name);
     }
 
     public async Task<IReadOnlyList<ServiceOption>> SearchAsync(string? name, CancellationToken cancellationToken) =>
@@ -59,7 +67,7 @@ public class ServiceOptionManager(IServiceOptionRepository serviceOptionReposito
     {
         if (await serviceOptionRepository.ExistsByNameAsync(name, excludingId, cancellationToken))
         {
-            throw new ConflictException($"A service named '{name}' already exists.");
+            throw new ConflictException("A service named '{Name}' already exists.", name);
         }
     }
 }

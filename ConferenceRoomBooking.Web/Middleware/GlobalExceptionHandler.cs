@@ -14,9 +14,9 @@ public class GlobalExceptionHandler(
     {
         var (statusCode, title) = MapException(exception);
         
-        if (exception is AppException)
+        if (exception is AppException appException)
         {
-            logger.LogWarning(exception, "Handled domain exception: {Message}", exception.Message);
+            logger.LogWarning(exception, appException.LogTemplate, appException.LogArgs);
         }
         else
         {
@@ -32,8 +32,8 @@ public class GlobalExceptionHandler(
             Status = (int)statusCode,
             Title = title,
             Type = exception.GetType().Name,
-            Detail = exception is AppException appException
-                ? appException.Message
+            Detail = exception is AppException clientSafeException
+                ? clientSafeException.Message
                 : "An unexpected error occurred. Please contact support if this persists.",
             Instance = httpContext.Request.Path,
             Extensions =

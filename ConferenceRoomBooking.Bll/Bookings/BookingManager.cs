@@ -31,14 +31,12 @@ public class BookingManager(
 
         var selectedServices = await ResolveServiceOptionsAsync(ids, cancellationToken);
 
-        var unavailableIds = ids.Except(room.Services.Select(s => s.Id));
-        if (unavailableIds.Count() > 0)
+        var unavailableIds = ids.Except(room.Services.Select(s => s.Id)).ToList();
+        if (unavailableIds.Count > 0)
         {
-            logger.LogWarning(
-                "Booking rejected for room {RoomId} by user {UserId}: service option(s) {ServiceOptionIds} not offered.",
-                roomId, currentUserId, unavailableIds);
             throw new ConflictException(
-                $"Service option(s) {string.Join(", ", unavailableIds)} are not offered by room '{room.Name}'.");
+                "Service option(s) {ServiceOptionIds} are not offered by room '{RoomName}' ({RoomId}).",
+                unavailableIds, room.Name, roomId);
         }
 
         var priceBreakdown = priceCalculator.Calculate(room.BaseHourRate, startTime, endTime,
