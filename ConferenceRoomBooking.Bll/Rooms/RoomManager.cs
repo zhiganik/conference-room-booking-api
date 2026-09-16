@@ -4,10 +4,15 @@ using ConferenceRoomBooking.Bll.Common.Rooms.Models;
 using ConferenceRoomBooking.Bll.Common.ServiceOptions;
 using ConferenceRoomBooking.Bll.Common.ServiceOptions.Models;
 using ConferenceRoomBooking.Bll.Common.Shared.Exceptions;
+using Microsoft.Extensions.Logging;
 
 namespace ConferenceRoomBooking.Bll.Rooms;
 
-public class RoomManager(IRoomRepository roomRepository, IServiceOptionRepository serviceOptionRepository, IBookingRepository bookingRepository) : IRoomManager
+public class RoomManager(
+    IRoomRepository roomRepository,
+    IServiceOptionRepository serviceOptionRepository,
+    IBookingRepository bookingRepository,
+    ILogger<RoomManager> logger) : IRoomManager
 {
     public async Task<Room> CreateAsync(string name, int capacity, decimal baseHourRate, List<Guid>? serviceOptionIds, CancellationToken cancellationToken)
     {
@@ -21,7 +26,9 @@ public class RoomManager(IRoomRepository roomRepository, IServiceOptionRepositor
             Services = services
         };
 
-        return await roomRepository.CreateAsync(room, cancellationToken);
+        var created = await roomRepository.CreateAsync(room, cancellationToken);
+        logger.LogInformation("Room {RoomId} '{RoomName}' created.", created.Id, created.Name);
+        return created;
     }
 
     public async Task<Room> GetByIdAsync(Guid roomId, CancellationToken cancellationToken) =>
@@ -41,6 +48,7 @@ public class RoomManager(IRoomRepository roomRepository, IServiceOptionRepositor
         room.Services = services;
 
         await roomRepository.UpdateAsync(room, cancellationToken);
+        logger.LogInformation("Room {RoomId} updated.", roomId);
 
         return await roomRepository.GetByIdAsync(roomId, cancellationToken)
             ?? throw new NotFoundException(nameof(Room), roomId);
@@ -53,10 +61,13 @@ public class RoomManager(IRoomRepository roomRepository, IServiceOptionRepositor
 
         if (await bookingRepository.HasActiveForRoomAsync(roomId, DateTime.UtcNow, cancellationToken))
         {
-            throw new ConflictException($"Room '{room.Name}' has active or upcoming bookings and cannot be deleted.");
+            throw new ConflictException(
+                "Room '{RoomName}' ({RoomId}) has active or upcoming bookings and cannot be deleted.",
+                room.Name, roomId);
         }
 
         await roomRepository.SoftDeleteAsync(roomId, cancellationToken);
+        logger.LogInformation("Room {RoomId} '{RoomName}' deleted.", roomId, room.Name);
     }
 
     public async Task<IReadOnlyList<AvailableRoom>> SearchAvailableAsync(DateTime startDate, DateTime endDate, int capacity, CancellationToken cancellationToken) =>
