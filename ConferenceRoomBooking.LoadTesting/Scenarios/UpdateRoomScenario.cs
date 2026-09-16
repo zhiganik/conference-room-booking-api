@@ -1,22 +1,24 @@
-using System.Text;
-using System.Text.Json;
+using ConferenceRoomBooking.LoadTesting.Auth;
+using ConferenceRoomBooking.LoadTesting.Fixtures;
 
 namespace ConferenceRoomBooking.LoadTesting.Scenarios;
 
-public sealed class UpdateRoomScenario(Guid roomId, string roomName, int capacity, decimal baseHourRate) : IRequestScenario
+/// <summary>Re-applies a fixture room's own values — idempotent, never touches real production rooms.</summary>
+public sealed class UpdateRoomScenario(TestDataFixture fixture) : RequestScenarioBase(Actor.Admin)
 {
-    public string Name => "PUT /api/rooms/{roomId}";
+    public override string Name => "PUT /api/rooms/{roomId}";
 
-    public Task<HttpResponseMessage> ExecuteAsync(HttpClient httpClient, int requestIndex)
+    public override Task<HttpResponseMessage> ExecuteAsync(HttpClient httpClient, AuthContext authContext, int requestIndex)
     {
-        var payload = JsonSerializer.Serialize(new
+        var room = fixture.GetRandomRoom(Random.Shared);
+        var payload = new
         {
-            Name = roomName,
-            Capacity = capacity,
-            BaseHourRate = baseHourRate,
-            ServiceOptionIds = (List<Guid>?)null
-        });
+            Name = room.Name,
+            Capacity = room.Capacity,
+            BaseHourRate = room.BaseHourlyRate,
+            ServiceOptionIds = fixture.ServiceOptionIds
+        };
 
-        return httpClient.PutAsync($"api/rooms/{roomId}", new StringContent(payload, Encoding.UTF8, "application/json"));
+        return SendAsync(httpClient, authContext, Actor, HttpMethod.Put, $"api/rooms/{room.Id}", payload);
     }
 }

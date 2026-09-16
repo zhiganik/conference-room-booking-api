@@ -1,32 +1,39 @@
 namespace ConferenceRoomBooking.LoadTesting;
 
-public sealed record LoadTestOptions(int Requests, IReadOnlyList<int> ParallelismLevels, string BaseUrl)
+public sealed record LoadTestOptions(int TotalRequests, int MaxConcurrency, double RequestsPerSecond, string BaseUrl, int? Seed)
 {
     public static LoadTestOptions Parse(string[] args)
     {
-        var requests = 1000;
-        var parallelismLevels = new List<int> { 10, 50, 100 };
+        var totalRequests = 1000;
+        var maxConcurrency = 10;
+        var requestsPerSecond = 5.0;
         var baseUrl = "http://localhost:5000";
+        int? seed = null;
 
         for (var i = 0; i < args.Length - 1; i++)
         {
             if (args[i] == "--requests" && int.TryParse(args[i + 1], out var parsedRequests))
             {
-                requests = parsedRequests;
+                totalRequests = parsedRequests;
             }
-            else if (args[i] == "--parallelism-levels")
+            else if (args[i] == "--max-concurrency" && int.TryParse(args[i + 1], out var parsedConcurrency))
             {
-                parallelismLevels = args[i + 1]
-                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                    .Select(int.Parse)
-                    .ToList();
+                maxConcurrency = parsedConcurrency;
+            }
+            else if (args[i] == "--rate" && double.TryParse(args[i + 1], out var parsedRate))
+            {
+                requestsPerSecond = parsedRate;
             }
             else if (args[i] == "--base-url")
             {
                 baseUrl = args[i + 1];
             }
+            else if (args[i] == "--seed" && int.TryParse(args[i + 1], out var parsedSeed))
+            {
+                seed = parsedSeed;
+            }
         }
 
-        return new LoadTestOptions(requests, parallelismLevels, baseUrl);
+        return new LoadTestOptions(totalRequests, maxConcurrency, requestsPerSecond, baseUrl, seed);
     }
 }
