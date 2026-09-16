@@ -15,25 +15,44 @@ public class TelegramBroadcastNotifier(
 {
     public async Task PushAsync(string message, CancellationToken cancellationToken)
     {
-        var chatIds = await alertSubscriberManager.GetAllAsync(cancellationToken);
+        var chatIds = await alertSubscriberManager.GetAllAsync(cancellationToken).ConfigureAwait(false);
 
-        await Task.WhenAll(chatIds.Select(chatId => SendAsync(chatId, message, cancellationToken)));
+        var tasks = chatIds.Select(chatId => SendAsync(chatId, message, cancellationToken)).ToList();
+
+        try
+        {
+            await Task.WhenAll(tasks).ConfigureAwait(false);
+        }
+        catch when (tasks.Any(t => t.IsFaulted))
+        {
+            var failures = tasks
+                .Where(t => t.IsFaulted)
+                .Select(t => t.Exception!.InnerException!)
+                .ToList();
+
+            throw new AggregateException(
+                $"{failures.Count}/{tasks.Count} Telegram notifications failed",
+                failures);
+        }
     }
 
     private async Task SendAsync(long chatId, string message, CancellationToken cancellationToken)
     {
         try
         {
-            await botClient.SendMessage(chatId, message, parseMode: ParseMode.Html, cancellationToken: cancellationToken);
+            await botClient
+                .SendMessage(chatId, message, parseMode: ParseMode.Html, cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
         }
         catch (ApiRequestException ex) when (ex.ErrorCode == (int)HttpStatusCode.Forbidden || IsChatNotFound(ex))
         {
             logger.LogInformation("Chat {ChatId} is no longer reachable, removing it", chatId);
-            await alertSubscriberManager.UnsubscribeAsync(chatId, cancellationToken);
+            await alertSubscriberManager.UnsubscribeAsync(chatId, cancellationToken).ConfigureAwait(false);
         }
-        catch (Exception ex)
+        catch (ApiRequestException ex)
         {
             logger.LogWarning(ex, "Failed to deliver a message to chat {ChatId}", chatId);
+            throw;
         }
     }
 

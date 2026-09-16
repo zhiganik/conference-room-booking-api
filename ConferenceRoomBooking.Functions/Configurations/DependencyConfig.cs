@@ -28,6 +28,11 @@ public static class DependencyConfig
             throw new InvalidOperationException("Telegram:BotToken is not configured.");
         }
 
+        if (string.IsNullOrWhiteSpace(telegramSettings.WebhookSecret))
+        {
+            throw new InvalidOperationException("Telegram:WebhookSecret is not configured.");
+        }
+
         services.AddHttpClient("telegram_bot_client")
             .AddTypedClient<ITelegramBotClient>((httpClient, _) =>
                 new TelegramBotClient(new TelegramBotClientOptions(telegramSettings.BotToken), httpClient));
