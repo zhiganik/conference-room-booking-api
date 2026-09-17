@@ -8,7 +8,11 @@ namespace ConferenceRoomBooking.Utils.Sql;
 
 public class SqlConnectionFactory(IConfiguration configuration) : IDbConnectionFactory
 {
-    private static readonly TokenCredential Credential = new DefaultAzureCredential();
+    private static readonly TokenCredential Credential = new DefaultAzureCredential(new DefaultAzureCredentialOptions
+    {
+        ExcludeManagedIdentityCredential = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development"
+            || Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT") == "Development"
+    });
     private static readonly string[] AzureSqlScope = ["https://database.windows.net/.default"];
 
     public IDbConnection CreateConnection()
