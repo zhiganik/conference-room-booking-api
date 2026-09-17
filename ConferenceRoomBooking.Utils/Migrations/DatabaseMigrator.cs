@@ -15,7 +15,15 @@ public static class DatabaseMigrator
         var connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
 
-        var connectionManager = new AzureSqlConnectionManager(connectionString, new DefaultAzureCredential());
+        var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development"
+            || Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT") == "Development";
+
+        var credential = new DefaultAzureCredential(new DefaultAzureCredentialOptions
+        {
+            ExcludeManagedIdentityCredential = isDevelopment
+        });
+
+        var connectionManager = new AzureSqlConnectionManager(connectionString, credential);
 
         var upgrader = DeployChanges.To
             .SqlDatabase(connectionManager, schema)
