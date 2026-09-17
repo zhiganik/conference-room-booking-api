@@ -27,6 +27,7 @@ builder.Configuration.AddAzureAppConfiguration(options =>
             .SetRefreshInterval(TimeSpan.FromMinutes(1)));
 });
 
+builder.Services.AddAzureAppConfiguration();
 builder.Services.AddDependencies(builder.Configuration);
 var app = builder.Build();
 
