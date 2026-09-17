@@ -7,6 +7,7 @@ public static class ApplicationConfig
 {
     public static WebApplication UseApplicationPipeline(this WebApplication app)
     {
+        app.UseAzureAppConfiguration();
         app.UseExceptionHandler();
 
         app.UseSwagger();
