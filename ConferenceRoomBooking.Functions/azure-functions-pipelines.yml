@@ -11,8 +11,6 @@ variables:
   azureSubscription: 'ZhehistovskyiAppConnection'
   functionAppName: 'm-zhehistovskyi-functions-app'
   keyVaultName: 'zhehistovskiikeyvault'
-  # Flex Consumption assigns a random-suffixed default hostname, not <functionAppName>.azurewebsites.net.
-  # Update this if the Function App is ever deleted and recreated.
   functionAppHostName: 'm-zhehistovskyi-functions-app-e5h2ayashjdqbvac.westeurope-01.azurewebsites.net'
 
 steps:

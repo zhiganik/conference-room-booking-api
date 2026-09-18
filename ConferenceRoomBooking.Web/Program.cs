@@ -27,7 +27,7 @@ builder.Configuration.AddAzureAppConfiguration(options =>
         .Select(KeyFilter.Any, builder.Environment.EnvironmentName)
         .ConfigureRefresh(refresh => refresh
             .Register("Sentinel", refreshAll: true)
-            .SetRefreshInterval(TimeSpan.FromMinutes(1)));
+            .SetRefreshInterval(TimeSpan.FromSeconds(10)));
 });
 
 builder.Services.AddAzureAppConfiguration();
@@ -35,6 +35,9 @@ builder.Services.AddDependencies(builder.Configuration);
 var app = builder.Build();
 
 app.UseApplicationPipeline();
+
+app.MapGet("api/config-debug/demo-message", (IConfiguration configuration) => configuration["Demo:Message"])
+    .AllowAnonymous();
 
 try
 {
